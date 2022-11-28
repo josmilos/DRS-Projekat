@@ -1,5 +1,6 @@
 import sqlite3
 
+#TREBA DA SE POZIVA PRI POKRETANJU APLIKACIJE
 def InitializeDatabase():
     conn = sqlite3.connect('drs_projekat.db')
     c = conn.cursor()
@@ -23,12 +24,19 @@ def InitializeDatabase():
     conn.commit()
     conn.close()
 
+#TREBA DA SE POZIVA KOD REGISTRACIJE
+#VRACA FALSE AKO JE EMAIL VEC KORISCEN, VRACA TRUE AKO JE USPESNO DODAO KORISNIKA
 def AddNewKorisnik(ime, prezime, adresa, grad, drzava, broj_telefona, email, lozinka):
     conn = sqlite3.connect('drs_projekat.db')
     c = conn.cursor()
+    c.execute("SELECT email from korisnik WHERE email=?", (email, ))
+    rez = c.fetchone()
+    if rez != None:
+        return False
     c.execute("INSERT INTO korisnici VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ime, prezime, adresa, grad, drzava, broj_telefona, email, lozinka, 0, "NE"))
     conn.commit()
     conn.close()
+    return True
 
 def DeleteKorisnik(email, lozinka):
     conn = sqlite3.connect('drs_projekat.db')
