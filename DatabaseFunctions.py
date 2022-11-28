@@ -8,7 +8,6 @@ def InitializeDatabase():
     lista_tabela = c.fetchall()
     if lista_tabela.__len__() != 0:
         return
-    
     c.execute("""CREATE TABLE korisnici (
         ime TEXT,
         prezime TEXT,
@@ -32,12 +31,26 @@ def AddNewKorisnik(ime, prezime, adresa, grad, drzava, broj_telefona, email, loz
     c.execute("SELECT email from korisnik WHERE email=?", (email, ))
     rez = c.fetchone()
     if rez != None:
+        conn.close()
         return False
     c.execute("INSERT INTO korisnici VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ime, prezime, adresa, grad, drzava, broj_telefona, email, lozinka, 0, "NE"))
     conn.commit()
     conn.close()
     return True
 
+#TREBA DA SE POZOVE KOD LOG IN
+#VRACA TRUE AKO POSTOJI KORISNIK SA TIM EMAILOM I LOZINKOM, VRACA FALSE AKO NE
+def CheckIfLogInIsValid(email, lozinka):
+    conn = sqlite3.connect('drs_projekat.db')
+    c = conn.cursor()
+    c.execute("SELECT email, lozinka FROM korisnici WHERE email = ? AND lozinka = ?", (email, lozinka))
+    rez = c.fetchone()
+    conn.close()
+    if rez == None:
+        return False
+    return True
+
+#OBRISE KORISNIKA IZ TABELE U BAZI
 def DeleteKorisnik(email, lozinka):
     conn = sqlite3.connect('drs_projekat.db')
     c = conn.cursor()
@@ -45,6 +58,7 @@ def DeleteKorisnik(email, lozinka):
     conn.commit()
     conn.close()
 
+#VRACA SVE PODATKE ZA KORISNIKA
 def GetKorisnik(email, lozinka):
     conn = sqlite3.connect('drs_projekat.db')
     c = conn.cursor()
