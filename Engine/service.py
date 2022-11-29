@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-import DatabaseFunctions
+#import DatabaseFunctions
 
 template_dir = os.path.abspath('../UI/templates')
 
@@ -13,6 +13,9 @@ app = Flask(__name__, template_folder=template_dir)
 @app.route('/')
 def home():
     return render_template("index.html")
+
+
+
 
 
 @app.route('/register', methods=["GET", "POST"])

@@ -1,13 +1,39 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>CEX - Log In</title>
-</head>
-<body>
-      <h1>Please Log In</h1>
-</body>
-</html>
+{% extends "base.html" %} {% block title %}CEX - Log In{% endblock %}  {% block content %}
+<form method="POST">
+      <table>
+            <tr>
+                  <td>Email</td>
+                  <td>
+                        
+                        
+                        <input
+                        type="email"
+                        class="form-control"
+                        id="email"
+                        name="email"
+                        placeholder="Enter email"
+                        />
+                        
+                  </td>
+            </tr>
+            <tr>
+                  <td>Password</td>
+
+                  <td>
+                        <input
+                        type="password"
+                        class="form-control"
+                        id="password"
+                        name="password"
+                        placeholder="Enter password"
+                        />
+                  </td>
+            </tr>
+            <tr colspan=2>
+                  
+            <button type="submit" class="btn btn-primary">Login</button>
+            </tr>
+      </table>
+</form>
+{% endblock %}
+
