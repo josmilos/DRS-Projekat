@@ -1,1 +1,87 @@
-{% extends "base.html" %} {% block title %}CEX - Registration{% endblock %} {% block content %}Register page {% endblock %}
+{% extends "base.html" %} {% block title %}CEX - Registration{% endblock %} {% block content %}
+Register page
+<form method="POST">
+    <table>
+        <tr>
+            <td>Ime</td>
+            <td>                  
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="ime"
+                  name="ime"
+                  placeholder="Enter name"
+                  />     
+            </td>
+        </tr>
+        <tr>
+            <td>Prezime</td>
+            <td>                  
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="prezime"
+                  name="prezime"
+                  placeholder="Enter surname"
+                  />     
+            </td>
+        </tr>
+        <tr>
+            <td>Adress</td>
+            <td>                  
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="adress"
+                  name="adress"
+                  placeholder="Enter adress"
+                  />     
+            </td>
+        </tr>
+        <tr>
+            <td>Broj telefona</td>
+            <td>                  
+                  <input
+                  type="number"
+                  class="form-control"
+                  id="brojTelefona"
+                  name="brojTelefona"
+                  placeholder="Enter brojTelefona"
+                  />     
+            </td>
+        </tr>
+          <tr>
+                <td>Email</td>
+                <td>
+                      
+                      
+                      <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      placeholder="Enter email"
+                      />
+                      
+                </td>
+          </tr>
+          <tr>
+                <td>Password</td>
+
+                <td>
+                      <input
+                      type="password"
+                      class="form-control"
+                      id="password"
+                      name="password"
+                      placeholder="Enter password"
+                      />
+                </td>
+          </tr>
+          <tr colspan=2>
+                
+          <button type="submit" class="btn btn-primary">Register</button>
+          </tr>
+    </table>
+</form>
+{% endblock %}
