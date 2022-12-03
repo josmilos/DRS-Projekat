@@ -8,10 +8,10 @@ class AddUserError(Exception):
 
 class UserNotFoundByEmail(UserNotFoundError):
     def __init__(self, email):
-        super.__init__(f"User with email {email} does not exist!")
+        super().__init__(f"User with email {email} does not exist!")
 
 
 class UserUnknownError():
     def __init__(self, email):
-        super.__init__(f"UnknownError: Could not find user with email {email}!")
+        super().__init__(f"UnknownError: Could not find user with email {email}!")
 
