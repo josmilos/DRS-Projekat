@@ -1,7 +1,7 @@
-from users import *
+from app import *
 
-start()
-# with app.app_context():
+#start()
+with app.app_context():
     #Program testing
     #db.create_all()
     # new_user = User(
@@ -18,4 +18,4 @@ start()
 #
     #add_new_user(new_user)
 #
-    #print(get_user_by_email("mail@mail.com").surname)
+    print(get_user_by_email("gmail@mail.com").surname)

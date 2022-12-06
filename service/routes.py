@@ -9,7 +9,7 @@ def home():
 
 
 # HTTP GET - Read Record
-@app.route("/get-user-by-email", methods=["GET"])
+@app.route("/search-user-by-email", methods=["GET"])
 def get_user_by_email():
     usr_email = request.args.get("email")
     found_user = db.session.query(User).filter_by(email=usr_email).first()
@@ -20,9 +20,13 @@ def get_user_by_email():
 
 
 # HTTP POST - Create Record
-@app.route("/add-new-user/", methods=["POST"])
+@app.route("/register-user", methods=["POST"])
 def add_new_user():
-    new_user = db.User(
+    existing_user = db.session.query(User).filter_by(email=request.args.get('email')).first()
+    if existing_user:
+        return jsonify(error={"Error": f"Can't register because user with email {existing_user.email} already exists!"}), 400
+
+    new_user = User(
         email=request.args.get('email'),
         password=request.args.get('pass'),
         name=request.args.get('name'),
@@ -32,31 +36,73 @@ def add_new_user():
         balance=float(0),
         verified=False
     )
-    if db.add_new_user(new_user):
-        return jsonify(response={"Success": f"Successfully created user with email {new_user.email}"}), 200
-    else:
+    try:
+        db.session.add(new_user)
+    except Exception as e:
+        print(e)
         return jsonify(error={"Error": f"User with email {new_user.email} could not be created"}), 400
+    else:
+        db.session.commit()
+    finally:
+        return jsonify(response={"Success": f"Successfully created user with email {new_user.email}"}), 200
 
 
 # HTTP PUT/PATCH - Update Record
-@app.route("/update-user-by-email/<string:usr_email>", methods=["PATCH"])
-def update_user_by_email(usr_email):
-    attribute = request.args.get('attr')
-    value = request.args.get('val')
-    if attribute != "password" or attribute != "name" or attribute != "surname" or attribute != "address" or attribute != "phone" or attribute != "balance" or attribute != "verified":
+@app.route("/update-user-by-email", methods=["PATCH"])
+def update_user_by_email():
+    usr_email = request.args.get('email')
+    attribute = str(request.args.get('attr'))
+    value = str(request.args.get('val'))
+    attributes_list = ["password", "name", "surname", "address", "phone", "balance", "verified"]
+    if attribute not in attributes_list:
         return jsonify(error={"Error": f"Provided attribute '{attribute}' is not valid!"}), 400
     else:
-        if db.update_user_by_email(usr_email, attribute, value):
-            return jsonify(response={"Success": f"Successfully updated following attributes for user with email {usr_email} : \n {attribute} = {value}"}), 200
+        user = db.session.query(User).filter_by(email=usr_email).first()
+        if user:
+            try:
+                if attribute == "password":
+                    user.password = value
+                elif attribute == "name":
+                    user.name = value
+                elif attribute == "surname":
+                    user.surname = value
+                elif attribute == "address":
+                    user.address = value
+                elif attribute == "phone":
+                    user.phone = value
+                elif attribute == "balance":
+                    user.balance = value
+                elif attribute == "verified":
+                    user.verified = value
+                else:
+                    return jsonify(error={"Error": f"Provided attribute '{attribute}' is not valid!"}), 400
+            except Exception as e:
+                print(e)
+                return jsonify(error={"Error": f"Sorry, we encountered error during updating user's attribute "}), 400
+            else:
+                db.session.commit()
+            finally:
+                return jsonify(response={
+                    "Success": f"Successfully updated following attributes for user with email {usr_email} : '{attribute} = {value}'"}), 200
         else:
-            return jsonify(error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
+            return jsonify(
+                error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
 
 
 # HTTP DELETE - Delete Record
-@app.route("/delete-user-by-email/<usr_email>", methods=["DELETE"])
-def delete_user_by_email(usr_email):
-    if db.delete_user_by_email(usr_email):
-        return jsonify(response={"Success": f"Successfully deleted user with email {usr_email}"}), 200
+@app.route("/delete-user-by-email", methods=["DELETE"])
+def delete_user_by_email():
+    usr_email = str(request.args.get('email'))
+    user = db.session.query(User).filter_by(email=usr_email).first()
+    if user:
+        try:
+            db.session.delete(user)
+        except Exception as e:
+            print(e)
+            return jsonify(error={"Error": f"Sorry, we encountered error during deletion of user from database"}), 400
+        else:
+            db.session.commit()
+        finally:
+            return jsonify(response={"Success": f"Successfully deleted user with email {usr_email}"}), 200
     else:
         return jsonify(error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
-
