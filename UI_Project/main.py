@@ -20,12 +20,29 @@ def home():
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
-    return render_template("register.html")
+    if request.method == "POST":
+        name=request.form["ime"]
+        surname=request.form["prezime"]
+        adress=request.form["adress"]
+        phoneNumber=request.form["brojTelefona"]
+        email=request.form["email"]
+        password=request.form["password"]
+        
+        return render_template("register.html")
+    else:    
+        return render_template("register.html")
 
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    if request.method == "POST":
+        
+        email=request.form["email"]
+        password=request.form["password"]
+        
+        return render_template("login.html")
+    else:    
+        return render_template("login.html")
 
 
 if __name__ == "__main__":
