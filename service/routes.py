@@ -16,7 +16,7 @@ def get_user_by_email():
     if found_user:
         return jsonify(user=found_user.to_dict())
     else:
-        return jsonify(error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
+        return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
 
 
 # HTTP POST - Create Record
@@ -46,6 +46,21 @@ def add_new_user():
     finally:
         return jsonify(response={"Success": f"Successfully created user with email {new_user.email}"}), 200
 
+
+@app.route("/login-user", methods=["GET"])
+def login_user():
+    email = request.args.get('email')
+    password = request.args.get('pass')
+
+    user = db.session.query(User).filter_by(email=email).first()
+
+    if user:
+        if user.password == password:
+            return jsonify(response={"Success": f"Successfully logged in to account with email {user.email}"}), 200
+        else:
+            return jsonify(error={"Wrong Credentials": f"Credentials for user with email {user.email} do not match"}), 401
+    else:
+        return jsonify(error={"Not Found": f"Sorry, user with email {email} was not found in the database"}), 404
 
 # HTTP PUT/PATCH - Update Record
 @app.route("/update-user-by-email", methods=["PATCH"])
