@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-#import DatabaseFunctions
+import requests
 
 template_dir = os.path.abspath('../UI/templates')
 
@@ -27,6 +27,20 @@ def register():
         phoneNumber=request.form["brojTelefona"]
         email=request.form["email"]
         password=request.form["password"]
+
+        parameters = {
+            "email": email,
+            "pass": password,
+            "name": name,
+            "surname": surname,
+            "addr": adress,
+            "ph": phoneNumber
+        }
+
+        response = requests.post("http://127.0.0.1:5000/register-user", params=parameters)
+        response.raise_for_status()
+        data = response.json()
+        print(data)
         
         return render_template("register.html")
     else:    
@@ -39,11 +53,21 @@ def login():
         
         email=request.form["email"]
         password=request.form["password"]
-        
+
+        parameters = {
+            "email": email,
+            "pass": password
+        }
+
+        response = requests.get("http://127.0.0.1:5000/login-user", params=parameters)
+        response.raise_for_status()
+        data = response.json()
+        print(data)
+
         return render_template("login.html")
     else:    
         return render_template("login.html")
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5002)
