@@ -1,7 +1,6 @@
-from flask import Flask, request, jsonify, render_template
-import DataBase.users as db
-
-app = Flask(__name__)
+from flask import request, jsonify, render_template
+from service import app, db
+from service.models import User, Transaction
 
 
 @app.route("/")
@@ -10,9 +9,10 @@ def home():
 
 
 # HTTP GET - Read Record
-@app.route("/get-user-by-email/<string:usr_email>", methods=["GET"])
-def get_user_by_email(usr_email):
-    found_user = db.get_user_by_email(usr_email)
+@app.route("/get-user-by-email", methods=["GET"])
+def get_user_by_email():
+    usr_email = request.args.get("email")
+    found_user = db.session.query(User).filter_by(email=usr_email).first()
     if found_user:
         return jsonify(user=found_user.to_dict())
     else:
@@ -53,13 +53,10 @@ def update_user_by_email(usr_email):
 
 
 # HTTP DELETE - Delete Record
-@app.route("/delete-user-by-email/<string:usr_email>", methods=["DELETE"])
+@app.route("/delete-user-by-email/<usr_email>", methods=["DELETE"])
 def delete_user_by_email(usr_email):
     if db.delete_user_by_email(usr_email):
         return jsonify(response={"Success": f"Successfully deleted user with email {usr_email}"}), 200
     else:
         return jsonify(error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
