@@ -1,6 +1,28 @@
 from flask import request, jsonify, render_template
 from service import app, db
 from service.models import User, Transaction
+from Crypto.Hash import keccak
+import random
+
+
+CARD_NUMBER = "4242424242424242"
+CARD_DATE = "02/23"
+CARD_CVV = "123"
+
+# Implement function that checks if passed card details match with the above
+def validate_card():
+    pass
+
+
+def hash_function(params):
+    data = ""
+    for key, value in params.items():
+        data += f"{value};"
+    print("Data to be hashed: " + data)
+    k = keccak.new(digest_bits=256)
+    k.update(bytes(data, encoding="ascii"))
+    print("Hashed data: " + k.hexdigest())
+    return k.hexdigest()
 
 
 @app.route("/")
@@ -15,6 +37,22 @@ def get_user_by_email():
     found_user = db.session.query(User).filter_by(email=usr_email).first()
     if found_user:
         return jsonify(user=found_user.to_dict())
+    else:
+        return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
+
+
+@app.route("/login-user", methods=["GET"])
+def login_user():
+    usr_email = request.args.get('email')
+    password = request.args.get('pass')
+
+    user = db.session.query(User).filter_by(email=usr_email).first()
+
+    if user:
+        if user.password == password:
+            return jsonify(response={"Success": f"Successfully logged in to account with email {user.email}"}), 200
+        else:
+            return jsonify(error={"Wrong Credentials": f"Credentials for user with email {user.email} do not match"}), 401
     else:
         return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
 
@@ -47,20 +85,12 @@ def add_new_user():
         return jsonify(response={"Success": f"Successfully created user with email {new_user.email}"}), 200
 
 
-@app.route("/login-user", methods=["GET"])
-def login_user():
-    email = request.args.get('email')
-    password = request.args.get('pass')
+# Add function which checks if CC details are valid and use it down here
+@app.route("/deposit", methods=["POST"])
+def deposit():
+    usr_email = request.args.get("email")
 
-    user = db.session.query(User).filter_by(email=email).first()
 
-    if user:
-        if user.password == password:
-            return jsonify(response={"Success": f"Successfully logged in to account with email {user.email}"}), 200
-        else:
-            return jsonify(error={"Wrong Credentials": f"Credentials for user with email {user.email} do not match"}), 401
-    else:
-        return jsonify(error={"Not Found": f"Sorry, user with email {email} was not found in the database"}), 404
 
 # HTTP PUT/PATCH - Update Record
 @app.route("/update-user-by-email", methods=["PATCH"])
@@ -104,6 +134,27 @@ def update_user_by_email():
                 error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
 
 
+# Add function which checks if CC details are valid and use it down here
+@app.route("/verify-user", methods=["PATCH"])
+def verify_user():
+    usr_email = request.args.get('email')
+    c_owner = request.args.get('cowner')
+    c_number = request.args.get('cnum')
+    c_date = request.args.get('cdate')
+    c_cvv = request.args.get('ccvv')
+
+    user = db.session.query(User).filter_by(email=usr_email).first()
+    if user.name != c_owner:
+        return jsonify(error={"Error": f"Card owner does not match with this user account"}), 400
+    else:
+        if c_number == CARD_NUMBER and c_date == CARD_DATE and c_cvv == CARD_CVV:
+            user.verified = True
+            db.session.commit()
+            return jsonify(response={"Success": f"Successfully verified user with email {user.email}"}), 200
+        else:
+            return jsonify(error={"Error": f"One of the card details provided are not valid"}), 400
+
+
 # HTTP DELETE - Delete Record
 @app.route("/delete-user-by-email", methods=["DELETE"])
 def delete_user_by_email():
@@ -121,3 +172,14 @@ def delete_user_by_email():
             return jsonify(response={"Success": f"Successfully deleted user with email {usr_email}"}), 200
     else:
         return jsonify(error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
+
+
+# Testing purposes
+# para = {
+#     "sender": "petar@mail.com",
+#     "receiver": "ivan@gmail.com",
+#     "amount": "10",
+#     "rndmint": f"{str(random.randint(0, 99))}"
+# }
+# #hash_function("petar@mail.com", "ivan@gmail.com", 10, random.randint(0, 99))
+# hash_function(para)
