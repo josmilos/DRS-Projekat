@@ -1,7 +1,7 @@
 from flask import request, jsonify, render_template
 from service import app, db
 from service.models import User, Transaction
-from Crypto.Hash import keccak
+#from Crypto.Hash import keccak
 import random
 
 
@@ -115,7 +115,9 @@ def update_user_by_email():
                 elif attribute == "address":
                     user.address = value
                 elif attribute == "phone":
+                    # Add check if new phone already exist in database
                     user.phone = value
+                # Possible deletion of the following 4 lines of code
                 elif attribute == "balance":
                     user.balance = value
                 elif attribute == "verified":
