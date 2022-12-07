@@ -9,11 +9,19 @@ CARD_NUMBER = "4242424242424242"
 CARD_DATE = "02/23"
 CARD_CVV = "123"
 
-# Implement function that checks if passed card details match with the above
-def validate_card():
-    pass
+
+def validate_card(card_number, card_date, card_cvv):
+    if card_number != CARD_NUMBER:
+        return False
+    elif card_date != CARD_DATE:
+        return False
+    elif card_cvv != CARD_CVV:
+        return False
+    else:
+        return True
 
 
+# Hash function for blockchain transactions
 def hash_function(params):
     data = ""
     for key, value in params.items():
@@ -85,13 +93,6 @@ def add_new_user():
         return jsonify(response={"Success": f"Successfully created user with email {new_user.email}"}), 200
 
 
-# Add function which checks if CC details are valid and use it down here
-@app.route("/deposit", methods=["POST"])
-def deposit():
-    usr_email = request.args.get("email")
-
-
-
 # HTTP PUT/PATCH - Update Record
 @app.route("/update-user-by-email", methods=["PATCH"])
 def update_user_by_email():
@@ -134,7 +135,6 @@ def update_user_by_email():
                 error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
 
 
-# Add function which checks if CC details are valid and use it down here
 @app.route("/verify-user", methods=["PATCH"])
 def verify_user():
     usr_email = request.args.get('email')
@@ -147,12 +147,38 @@ def verify_user():
     if user.name != c_owner:
         return jsonify(error={"Error": f"Card owner does not match with this user account"}), 400
     else:
-        if c_number == CARD_NUMBER and c_date == CARD_DATE and c_cvv == CARD_CVV:
+        if validate_card(c_number, c_date, c_cvv):
+            # Here should be implemented adding to the transaction database
             user.verified = True
             db.session.commit()
             return jsonify(response={"Success": f"Successfully verified user with email {user.email}"}), 200
         else:
-            return jsonify(error={"Error": f"One of the card details provided are not valid"}), 400
+            return jsonify(error={"Error": f"One or more of the card details provided are not valid"}), 400
+
+
+@app.route("/deposit", methods=["PATCH"])
+def deposit():
+    usr_email = request.args.get("email")
+    c_owner = request.args.get('cowner')
+    c_number = request.args.get('cnum')
+    c_date = request.args.get('cdate')
+    c_cvv = request.args.get('ccvv')
+    amount = request.args.get('amount')
+
+    user = db.session.query(User).filter_by(email=usr_email).first()
+    if user.verified:
+        if user.name != c_owner:
+            return jsonify(error={"Error": f"Card owner does not match with this user account"}), 400
+        else:
+            if validate_card(validate_card(c_number, c_date, c_cvv)):
+                # Here should be implemented adding to the transaction database
+                user.balance = amount
+                db.session.commit()
+                return jsonify(response={"Success": f"Successfully deposited ${amount} into user account"}), 200
+            else:
+                return jsonify(error={"Error": f"One or more of the card details provided are not valid"}), 400
+    else:
+        return jsonify(error={"Error": f"This user is not verified. Deposit could not be made before verification!"}), 400
 
 
 # HTTP DELETE - Delete Record
