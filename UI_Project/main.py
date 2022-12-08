@@ -16,6 +16,11 @@ app.secret_key="key"
 def home():
     return render_template("index.html")
 
+@app.route('/logout', methods=["GET", "POST"])
+def logout():
+    if "user" in session:
+        session.pop("user",None)
+    return render_template("index.html")
 
 
 
@@ -26,10 +31,10 @@ def register():
         user=session["user"]
         return render_template("index.html")
     if request.method == "POST":
-        name=request.form["ime"]
-        surname=request.form["prezime"]
+        name=request.form["name"]
+        surname=request.form["surname"]
         adress=request.form["adress"]
-        phoneNumber=request.form["brojTelefona"]
+        phoneNumber=request.form["phoneNumber"]
         email=request.form["email"]
         password=request.form["password"]
 
