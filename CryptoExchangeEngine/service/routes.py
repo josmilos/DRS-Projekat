@@ -25,7 +25,8 @@ def validate_card(card_number, card_date, card_cvv):
 def hash_function(params):
     data = ""
     for key, value in params.items():
-        data += f"{value};"
+        data += f"{value}"
+    data += str(random.randint(1, 1000))
     print("Data to be hashed: " + data)
     k = keccak.new(digest_bits=256)
     k.update(bytes(data, encoding="ascii"))
@@ -44,7 +45,7 @@ def get_user_by_email():
     usr_email = request.args.get("email")
     found_user = db.session.query(User).filter_by(email=usr_email).first()
     if found_user:
-        return jsonify(user=found_user.to_dict())
+        return jsonify(user=found_user.to_dict()), 200
     else:
         return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
 
@@ -54,13 +55,13 @@ def login_user():
     usr_email = request.args.get('email')
     password = request.args.get('pass')
 
-    user = db.session.query(User).filter_by(email=usr_email).first()
+    found_user = db.session.query(User).filter_by(email=usr_email).first()
 
-    if user:
-        if user.password == password:
-            return jsonify(response={"Success": f"Successfully logged in to account with email {user.email}"}), 200
+    if found_user:
+        if found_user.password == password:
+            return jsonify(user=found_user.to_dict()), 200
         else:
-            return jsonify(error={"Wrong Credentials": f"Credentials for user with email {user.email} do not match"}), 401
+            return jsonify(error={"Wrong Credentials": f"Credentials for user with email {found_user.email} do not match"}), 401
     else:
         return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
 
@@ -86,11 +87,11 @@ def add_new_user():
         db.session.add(new_user)
     except Exception as e:
         print(e)
-        return jsonify(error={"Error": f"User with email {new_user.email} could not be created"}), 400
+        return jsonify(error={"Error": f"User with email {new_user.email} could not be created"}), 500
     else:
         db.session.commit()
     finally:
-        return jsonify(response={"Success": f"Successfully created user with email {new_user.email}"}), 200
+        return jsonify(user=new_user.to_dict()), 200
 
 
 # HTTP PUT/PATCH - Update Record
