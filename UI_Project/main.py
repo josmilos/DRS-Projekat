@@ -1,30 +1,40 @@
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import requests
+
+ 
 
 template_dir = os.path.abspath('../UI/templates')
 
 app = Flask(__name__, template_folder=template_dir)
 # login_manager = LoginManager()
 # login_manager.init_app(app)
-
+app.secret_key="key"
 
 @app.route('/')
 def home():
     return render_template("index.html")
 
+@app.route('/logout', methods=["GET", "POST"])
+def logout():
+    if "user" in session:
+        session.pop("user",None)
+    return render_template("index.html")
 
 
 
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
+    if "user" in session:
+        user=session["user"]
+        return render_template("index.html")
     if request.method == "POST":
-        name=request.form["ime"]
-        surname=request.form["prezime"]
+        name=request.form["name"]
+        surname=request.form["surname"]
         adress=request.form["adress"]
-        phoneNumber=request.form["brojTelefona"]
+        phoneNumber=request.form["phoneNumber"]
         email=request.form["email"]
         password=request.form["password"]
 
@@ -40,6 +50,8 @@ def register():
         response = requests.post("http://127.0.0.1:5000/register-user", params=parameters)
         response.raise_for_status()
         data = response.json()
+        
+        session["user"]=data
         print(data)
         
         return render_template("register.html")
@@ -49,6 +61,9 @@ def register():
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
+    if "user" in session:
+        user=session["user"]
+        return render_template("index.html")
     if request.method == "POST":
         
         email=request.form["email"]
@@ -62,6 +77,7 @@ def login():
         response = requests.get("http://127.0.0.1:5000/login-user", params=parameters)
         response.raise_for_status()
         data = response.json()
+        session["user"]=data
         print(data)
 
         return render_template("login.html")
