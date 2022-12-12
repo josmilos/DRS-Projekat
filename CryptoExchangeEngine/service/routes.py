@@ -1,37 +1,7 @@
 from flask import request, jsonify, render_template
-from service import app, db
-from service.models import User, Transaction
-from Crypto.Hash import keccak
-import random
-
-
-CARD_NUMBER = "4242424242424242"
-CARD_DATE = "02/23"
-CARD_CVV = "123"
-
-
-def validate_card(card_number, card_date, card_cvv):
-    if card_number != CARD_NUMBER:
-        return False
-    elif card_date != CARD_DATE:
-        return False
-    elif card_cvv != CARD_CVV:
-        return False
-    else:
-        return True
-
-
-# Hash function for blockchain transactions
-def hash_function(params):
-    data = ""
-    for key, value in params.items():
-        data += f"{value}"
-    data += str(random.randint(1, 1000))
-    print("Data to be hashed: " + data)
-    k = keccak.new(digest_bits=256)
-    k.update(bytes(data, encoding="ascii"))
-    print("Hashed data: " + k.hexdigest())
-    return k.hexdigest()
+from CryptoExchangeEngine.service import app, db
+from CryptoExchangeEngine.service.models import User, Transaction, CryptoCurrency
+from CryptoExchangeEngine.service.functions import validate_card, hash_function, process_transaction
 
 
 @app.route("/")
@@ -61,7 +31,8 @@ def login_user():
         if found_user.password == password:
             return jsonify(user=found_user.to_dict()), 200
         else:
-            return jsonify(error={"Wrong Credentials": f"Credentials for user with email {found_user.email} do not match"}), 401
+            return jsonify(
+                error={"Wrong Credentials": f"Credentials for user with email {found_user.email} do not match"}), 401
     else:
         return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
 
@@ -71,7 +42,8 @@ def login_user():
 def add_new_user():
     existing_user = db.session.query(User).filter_by(email=request.args.get('email')).first()
     if existing_user:
-        return jsonify(error={"Error": f"Can't register because user with email {existing_user.email} already exists!"}), 400
+        return jsonify(
+            error={"Error": f"Can't register because user with email {existing_user.email} already exists!"}), 400
 
     new_user = User(
         email=request.args.get('email'),
@@ -92,6 +64,11 @@ def add_new_user():
         db.session.commit()
     finally:
         return jsonify(user=new_user.to_dict()), 200
+
+
+@app.route("/buy-crypto", methods=["POST", "PATCH"])
+def buy_crypto():
+    pass
 
 
 # HTTP PUT/PATCH - Update Record
@@ -138,50 +115,119 @@ def update_user_by_email():
                 error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
 
 
-@app.route("/verify-user", methods=["PATCH"])
+@app.route("/verify-user", methods=["POST", "PATCH"])
 def verify_user():
-    usr_email = request.args.get('email')
-    c_owner = request.args.get('cowner')
-    c_number = request.args.get('cnum')
-    c_date = request.args.get('cdate')
-    c_cvv = request.args.get('ccvv')
+    usr_email = str(request.args.get('email'))
+    c_owner = str(request.args.get('cowner'))
+    c_number = str(request.args.get('cnum'))
+    c_date = str(request.args.get('cdate'))
+    c_cvv = str(request.args.get('ccvv'))
 
     user = db.session.query(User).filter_by(email=usr_email).first()
-    if user.name != c_owner:
+    if f"{user.name} {user.surname}" != c_owner:
         return jsonify(error={"Error": f"Card owner does not match with this user account"}), 400
     else:
         if validate_card(c_number, c_date, c_cvv):
             # Here should be implemented adding to the transaction database
             user.verified = True
+            new_transaction = Transaction(
+                type="VERIFY",
+                state="PROCESSED",
+                currency="USD",
+                sender_email=user.email,
+                amount=1
+            )
+            db.session.add(new_transaction)
             db.session.commit()
             return jsonify(response={"Success": f"Successfully verified user with email {user.email}"}), 200
         else:
             return jsonify(error={"Error": f"One or more of the card details provided are not valid"}), 400
 
 
-@app.route("/deposit", methods=["PATCH"])
+@app.route("/deposit", methods=["POST", "PATCH"])
 def deposit():
-    usr_email = request.args.get("email")
-    c_owner = request.args.get('cowner')
-    c_number = request.args.get('cnum')
-    c_date = request.args.get('cdate')
-    c_cvv = request.args.get('ccvv')
-    amount = request.args.get('amount')
+    usr_email = str(request.args.get("email"))
+    c_owner = str(request.args.get('cowner'))
+    c_number = str(request.args.get('cnum'))
+    c_date = str(request.args.get('cdate'))
+    c_cvv = str(request.args.get('ccvv'))
+    amount = float(request.args.get('amount'))
 
     user = db.session.query(User).filter_by(email=usr_email).first()
     if user.verified:
-        if user.name != c_owner:
+        if f"{user.name} {user.surname}" != c_owner:
             return jsonify(error={"Error": f"Card owner does not match with this user account"}), 400
         else:
-            if validate_card(validate_card(c_number, c_date, c_cvv)):
+            if validate_card(c_number, c_date, c_cvv):
                 # Here should be implemented adding to the transaction database
                 user.balance = amount
+                new_transaction = Transaction(
+                    type="DEPOSIT",
+                    state="PROCESSED",
+                    currency="USD",
+                    sender_email=user.email,
+                    amount=amount
+                )
+                db.session.add(new_transaction)
                 db.session.commit()
                 return jsonify(response={"Success": f"Successfully deposited ${amount} into user account"}), 200
             else:
                 return jsonify(error={"Error": f"One or more of the card details provided are not valid"}), 400
     else:
-        return jsonify(error={"Error": f"This user is not verified. Deposit could not be made before verification!"}), 400
+        return jsonify(
+            error={"Error": f"This user is not verified. Deposit could not be made before verification!"}), 400
+
+
+@app.route("/transaction", methods=["POST", "PATCH"])
+def transaction():
+    sender = str(request.args.get('sender'))
+    receiver = str(request.args.get('receiver'))
+    crypto_currency = str(request.args.get('curr'))
+    amount = float(request.args.get('amount'))
+
+    user_sender = db.session.query(User).filter_by(email=sender).first()
+    user_receiver = db.session.query(User).filter_by(email=receiver).first()
+    if not user_sender and not user_receiver:
+        return jsonify(error={"Error": "Invalid request, user(s) does not exist!"}), 400
+    if user_sender.verified and user_receiver.verified:
+        if sender == receiver:
+            return jsonify(error={"Error": "You can not send crypto transaction to yourself!"}), 400
+        elif crypto_currency != "USD":
+            sender_balance = db.session.query(CryptoCurrency).filter_by(email=sender, currency=crypto_currency).first()
+            if sender_balance:
+                new_balance = float(sender_balance.amount) - amount
+                if new_balance < 0:
+                    return jsonify(error={"Error": f"Sender has insufficient balance to perform requested transaction. Requested: {amount}  Available: {sender_balance.amount}"}), 400
+                else:
+                    hashed_id = hash_function({"sender": sender, "receiver": receiver, "amount": amount})
+                    sender_balance.amount = new_balance
+                    db.session.commit()
+                    process_transaction(hashed_id, sender, receiver, amount, crypto_currency, tr_type="WITHDRAW", state="PROCESSING")
+                    return jsonify(response={"Success": f"Transaction with id: {hashed_id} has been successfully initiated"}), 200
+        else:
+            new_balance = float(user_sender.balance) - amount
+            if new_balance < 0:
+                return jsonify(error={
+                    "Error": f"Sender has insufficient balance to perform requested transaction. Requested: {amount}  Available: {user_sender.balance}"}), 400
+            else:
+                user_sender.balance = new_balance
+                new_transaction = Transaction(
+                    type="WITHDRAW",
+                    state="PROCESSED",
+                    currency="USD",
+                    sender_email=user_sender.email,
+                    receiver_email=user_receiver.email,
+                    amount=amount
+                )
+                db.session.add(new_transaction)
+                user_receiver.balance = amount
+                db.session.commit()
+                return jsonify(
+                    response={"Success": f"Transaction has been successfully processed"}), 200
+    elif not user_sender.verified:
+        return jsonify(error={"Error": "Sender is not verified, unverified users can not make transactions!"}), 403
+    elif not user_receiver.verified:
+        return jsonify(error={"Error": "Receiver is not verified, unverified users can not receive transactions!"}), 403
 
 
 # HTTP DELETE - Delete Record
@@ -202,13 +248,5 @@ def delete_user_by_email():
     else:
         return jsonify(error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
 
-
 # Testing purposes
-# para = {
-#     "sender": "petar@mail.com",
-#     "receiver": "ivan@gmail.com",
-#     "amount": "10",
-#     "rndmint": f"{str(random.randint(0, 99))}"
-# }
-# #hash_function("petar@mail.com", "ivan@gmail.com", 10, random.randint(0, 99))
-# hash_function(para)
+
