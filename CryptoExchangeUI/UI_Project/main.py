@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+#from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import requests
 
  
@@ -22,7 +22,15 @@ def logout():
         session.pop("user",None)
     return render_template("index.html")
 
+@app.route('/profil')
+def profil():
+    user = session["user"]
+    return render_template("profil.html", user=user)
 
+@app.route('/edit')
+def edit():
+    user = session["user"]
+    return render_template("edit.html", user=user)
 
 
 @app.route('/register', methods=["GET", "POST"])
