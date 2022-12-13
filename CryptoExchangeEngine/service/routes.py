@@ -25,6 +25,10 @@ def get_user_by_email():
 
 # TO DO: search cryptocurrency owned by email and currency name
 
+# TO DO: return all cryptocurrencies owned by user
+
+# TO DO: return all transactions
+
 
 @app.route("/login-user", methods=["GET"])
 def login_user():
