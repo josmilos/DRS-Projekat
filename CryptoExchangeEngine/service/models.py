@@ -1,4 +1,4 @@
-from service import db
+from CryptoExchangeEngine.service import db
 from datetime import datetime
 
 
@@ -38,12 +38,13 @@ class CryptoCurrency(db.Model):
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    hash_id = db.Column(db.String(500), nullable=False)
+    hash_id = db.Column(db.String(500), nullable=True)
     time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    type = db.Column(db.String(10), nullable=False) # type = DEPOSIT || WITHDRAW
+    type = db.Column(db.String(10), nullable=False) # type =  DEPOSIT || WITHDRAW || VERIFY || BUY || SELL || EXCHANGE
     state = db.Column(db.String(15), nullable=False) # state = PROCESSING || DENIED || PROCESSED
+    currency = db.Column(db.String(30), nullable=False)
     sender_email = db.Column(db.String(150), db.ForeignKey('user.id'), nullable=False)
-    receiver_email = db.Column(db.String(150), nullable=False)
+    receiver_email = db.Column(db.String(150), nullable=True)
     amount = db.Column(db.Float, nullable=False)
 
     def __repr__(self):

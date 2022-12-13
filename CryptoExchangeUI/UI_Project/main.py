@@ -50,9 +50,13 @@ def register():
         response = requests.post("http://127.0.0.1:5000/register-user", params=parameters)
         response.raise_for_status()
         data = response.json()
-        
-        session["user"]=data
-        print(data)
+        if response.status_code == 200:
+            session["user"] = data
+            print(data)
+        elif response.status_code == 400:
+            print("User already exists")
+        elif response.status_code == 500:
+            print("User not created due to server error")
         
         return render_template("register.html")
     else:    
@@ -77,8 +81,18 @@ def login():
         response = requests.get("http://127.0.0.1:5000/login-user", params=parameters)
         response.raise_for_status()
         data = response.json()
-        session["user"]=data
-        print(data)
+
+        # if next(iter(data)) == 'response' and response.status_code == 200:
+        #     if next(iter(data["response"])) == 'Success':
+        #         session["user"] = data
+
+        if response.status_code == 200:
+            session["user"] = data
+            print(data)
+        elif response.status_code == 401:
+            print("Wrong Credentials")
+        elif response.status_code == 404:
+            print("User not found")
 
         return render_template("login.html")
     else:    
