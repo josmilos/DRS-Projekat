@@ -1,0 +1,77 @@
+{% extends "base.html" %} {% block title %}CEX - edit Page{% endblock %} {% block content %}
+<form method="POST">
+    <table>
+        <tr>
+            <td>Name</td>
+            <td>
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  placeholder="Enter name"
+                  value={{ user["user"]["name"] }}
+                  />
+            </td>
+        </tr>
+        <tr>
+            <td>Surname</td>
+            <td>
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="surname"
+                  name="surname"
+                  placeholder="Enter surname"
+                  value={{ user["user"]["surname"] }}
+                  />
+            </td>
+        </tr>
+        <tr>
+            <td>Adress</td>
+            <td>
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="adress"
+                  name="adress"
+                  placeholder="Enter adress"
+                  value={{ user["user"]["address"] }}
+                  />
+            </td>
+        </tr>
+        <tr>
+            <td>Phone number</td>
+            <td>
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  placeholder="Enter phone number"
+                  value={{ user["user"]["phone"] }}
+                  />
+            </td>
+        </tr>
+
+          <tr>
+                <td>Password</td>
+
+                <td>
+                      <input
+                      type="password"
+                      class="form-control"
+                      id="password"
+                      name="password"
+                      placeholder="Enter password"
+                      value={{ user["user"]["password"] }}
+                      />
+                </td>
+          </tr>
+          <tr colspan=2>
+
+          <button type="submit" class="btn btn-primary">Edit</button>
+          </tr>
+    </table>
+</form>
+{% endblock %}
