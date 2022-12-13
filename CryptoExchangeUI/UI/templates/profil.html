@@ -1,0 +1,28 @@
+{% extends "base.html" %} {% block title %}Profil Page{% endblock %} {% block content %}
+
+
+<table border="1">
+     <tr colspan=2>
+
+      PROFIL
+      </tr>
+    {% for key,value in user.items() %}
+    {% for key2,value2 in value.items() %}
+     <tr>
+        <td>{{ key2|upper }}</td>
+        <td>
+              {{ value2 }}
+        </td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    <tr>
+        <td>Edit profile</td>
+        <td>
+              <a href="/edit">EDIT</a>
+        </td>
+    </tr>
+</table>
+
+
+{% endblock %}
