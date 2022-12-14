@@ -3,6 +3,10 @@ from flask import Flask, render_template, request, session, redirect, url_for
 #from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import requests
 
+
+CMC_ENDPOINT = "https://pro-api.coinmarketcap.com"
+CMC_PRO_API_KEY = "a05ec627-fb01-4d24-84fb-52034219b16b"
+
  
 
 template_dir = os.path.abspath('../UI/templates')
@@ -12,8 +16,27 @@ app = Flask(__name__, template_folder=template_dir)
 # login_manager.init_app(app)
 app.secret_key="key"
 
+
+def crypto_price(cryptos):
+    return_price = {}
+    for crypto in cryptos:
+        parameters = {
+            "amount": 1,
+            "symbol": crypto,
+            "convert": "USD",
+            "CMC_PRO_API_KEY": CMC_PRO_API_KEY
+        }
+        response = requests.get(CMC_ENDPOINT + "/v2/tools/price-conversion", params=parameters)
+        price = response.json()["data"][0]["quote"]["USD"]["price"]
+        return_price[crypto] = round(price, 2)
+
+    return return_price
+
 @app.route('/')
 def home():
+    cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
+    cryptocurrency_prices = crypto_price(cryptos)
+    print(cryptocurrency_prices)
     return render_template("index.html")
 
 @app.route('/logout', methods=["GET", "POST"])

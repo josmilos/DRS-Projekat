@@ -41,10 +41,19 @@ def process_transaction(hashed_id, sender, receiver, amount, currency, tr_type, 
         amount=amount
     )
     print(f"Processing transaction with hashID: {hashed_id} ")
+    print(f"Currency {currency}")
 
     # After 5 minutes these actions below will be taken
     receiver_balance = db.session.query(CryptoCurrency).filter_by(email=receiver, currency=currency).first()
-    receiver_balance.amount += amount
+    if receiver_balance:
+        receiver_balance.amount += amount
+    else:
+        new_currency = CryptoCurrency(
+            email=receiver,
+            currency=currency,
+            amount=amount
+        )
+        db.session.add(new_currency)
     new_transaction.state = "PROCESSED"
     db.session.add(new_transaction)
     db.session.commit()
