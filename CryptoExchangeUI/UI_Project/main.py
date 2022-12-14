@@ -30,7 +30,36 @@ def profil():
 @app.route('/edit')
 def edit():
     user = session["user"]
-    return render_template("edit.html", user=user)
+    if request.method == "POST":
+        name = request.form["name"]
+        surname = request.form["surname"]
+        adress = request.form["adress"]
+        phoneNumber = request.form["phoneNumber"]
+        email = user["user"]["email"]
+        password = request.form["password"]
+
+        parameters = {
+            "email": email,
+            "pass": password,
+            "name": name,
+            "surname": surname,
+            "addr": adress,
+            "ph": phoneNumber
+        }
+
+        response = requests.post("http://127.0.0.1:5000/update-user-by-email", params=parameters)
+        response.raise_for_status()
+        data = response.json()
+        if response.status_code == 200:
+            session["user"] = data
+            print(data)
+
+        elif response.status_code == 500:
+            print("User not updated due to server error")
+
+        return render_template("profil.html")
+    else:
+        return render_template("edit.html", user=user)
 
 
 @app.route('/register', methods=["GET", "POST"])
