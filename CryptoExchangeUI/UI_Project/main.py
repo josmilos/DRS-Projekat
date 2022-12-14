@@ -32,11 +32,12 @@ def crypto_price(cryptos):
 
     return return_price
 
+
 @app.route('/')
 def home():
     cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
-    cryptocurrency_prices = crypto_price(cryptos)
-    print(cryptocurrency_prices)
+    # cryptocurrency_prices = crypto_price(cryptos)
+    # print(cryptocurrency_prices)
     return render_template("index.html")
 
 @app.route('/logout', methods=["GET", "POST"])
@@ -50,7 +51,7 @@ def profil():
     user = session["user"]
     return render_template("profil.html", user=user)
 
-@app.route('/edit')
+@app.route('/edit', methods=["GET", "POST", "PATCH"])
 def edit():
     user = session["user"]
     if request.method == "POST":
@@ -70,17 +71,18 @@ def edit():
             "ph": phoneNumber
         }
 
-        response = requests.post("http://127.0.0.1:5000/update-user-by-email", params=parameters)
+        response = requests.patch("http://127.0.0.1:5000/update-user-by-email", params=parameters)
         response.raise_for_status()
         data = response.json()
         if response.status_code == 200:
             session["user"] = data
+            user = session["user"]
             print(data)
 
         elif response.status_code == 500:
             print("User not updated due to server error")
 
-        return render_template("profil.html")
+        return render_template("profil.html", user=user)
     else:
         return render_template("edit.html", user=user)
 
