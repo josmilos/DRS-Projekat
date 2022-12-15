@@ -19,14 +19,38 @@ def get_user_by_email():
     else:
         return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
 
-# TO DO: search transaction by sender email
 
-# TO DO: search transaction by receiver email
+@app.route("/user-transactions", methods=["GET"])
+def user_transactions():
+    transactions_list = []
+    usr_email = request.args.get("email")
+    sender_transactions = db.session.query(Transaction).filter_by(sender_email=usr_email).all()
+    receiver_transactions = db.session.query(Transaction).filter_by(receiver_email=usr_email).all()
+    for trx in sender_transactions:
+        temp = trx.to_dict()
+        transactions_list.append(temp)
+    for trx in receiver_transactions:
+        temp = trx.to_dict()
+        transactions_list.append(temp)
+    print(transactions_list)
+    return jsonify(transactions_list), 200
+
+
 
 # TO DO: search cryptocurrency owned by email and currency name
 
-# TO DO: return all cryptocurrencies owned by user
 
+@app.route("/user-cryptocurrencies", methods=["GET"])
+def user_cryptocurrencies():
+    owned_list = []
+    usr_email = request.args.get("email")
+    user_owned_crypto = db.session.query(CryptoCurrency).filter_by(email=usr_email).all()
+    for crypto in user_owned_crypto:
+        temp = crypto.to_dict()
+        if float(temp["amount"]) > 0:
+            owned_list.append({"currency" : temp["currency"], "amount": temp["amount"]})
+    print(jsonify(owned_list))
+    return jsonify(owned_list), 200
 # TO DO: return all transactions
 
 
