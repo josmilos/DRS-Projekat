@@ -234,45 +234,34 @@ def exchange_crypto():
 # HTTP PUT/PATCH - Update Record
 @app.route("/update-user-by-email", methods=["PATCH"])
 def update_user_by_email():
-    usr_email = request.args.get('email')
-    attribute = str(request.args.get('attr'))
-    value = str(request.args.get('val'))
-    attributes_list = ["password", "name", "surname", "address", "phone", "balance", "verified"]
-    if attribute not in attributes_list:
-        return jsonify(error={"Error": f"Provided attribute '{attribute}' is not valid!"}), 400
-    else:
-        user = db.session.query(User).filter_by(email=usr_email).first()
-        if user:
-            try:
-                if attribute == "password":
-                    user.password = value
-                elif attribute == "name":
-                    user.name = value
-                elif attribute == "surname":
-                    user.surname = value
-                elif attribute == "address":
-                    user.address = value
-                elif attribute == "phone":
-                    # Add check if new phone already exist in database
-                    user.phone = value
-                # Possible deletion of the following 4 lines of code
-                elif attribute == "balance":
-                    user.balance = value
-                elif attribute == "verified":
-                    user.verified = value
-                else:
-                    return jsonify(error={"Error": f"Provided attribute '{attribute}' is not valid!"}), 400
-            except Exception as e:
-                print(e)
-                return jsonify(error={"Error": f"Sorry, we encountered error during updating user's attribute "}), 400
+    usr_email = str(request.args.get('email'))
+    usr_password = str(request.args.get('pass'))
+    usr_name = str(request.args.get('name'))
+    usr_surname = str(request.args.get('surname'))
+    usr_address = str(request.args.get('addr'))
+    usr_phone = str(request.args.get('ph'))
+
+    user = db.session.query(User).filter_by(email=usr_email).first()
+    if user:
+        user_phone = db.session.query(User).filter_by(phone=usr_phone).first()
+        if user_phone:
+            if user_phone.email != user.email:
+                return jsonify(error={"Error": "This phone is already registered. You can't use that number!"}), 400
             else:
-                db.session.commit()
-            finally:
-                return jsonify(response={
-                    "Success": f"Successfully updated following attributes for user with email {usr_email} : '{attribute} = {value}'"}), 200
+                user.phone = usr_phone
         else:
-            return jsonify(
-                error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
+            user.phone = usr_phone
+
+        user.password = usr_password
+        user.address = usr_address
+        user.name = usr_name
+        user.surname = usr_surname
+
+        db.session.commit()
+        return jsonify(user=user.to_dict()), 200
+    else:
+        return jsonify(
+            error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
 
 
 @app.route("/verify-user", methods=["POST", "PATCH"])
