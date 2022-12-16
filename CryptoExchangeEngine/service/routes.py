@@ -20,8 +20,6 @@ def get_user_by_email():
         return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
 
 
-
-
 @app.route("/user-transactions", methods=["GET"])
 def user_transactions():
     transactions_list = []
@@ -39,7 +37,6 @@ def user_transactions():
 
 
 
-# TO DO: search cryptocurrency owned by email and currency name
 @app.route("/user-cryptocurrency-by-email-name", methods=["GET"])
 def user_cryptocurrencies_by_email_name():
     owned_list = []
@@ -54,7 +51,6 @@ def user_cryptocurrencies_by_email_name():
     return jsonify(owned_list), 200
 
 
-
 @app.route("/user-cryptocurrencies", methods=["GET"])
 def user_cryptocurrencies():
     owned_list = []
@@ -66,7 +62,6 @@ def user_cryptocurrencies():
             owned_list.append({"currency" : temp["currency"], "amount": temp["amount"]})
     print(jsonify(owned_list))
     return jsonify(owned_list), 200
-# TO DO: return all transactions
 
 
 @app.route("/login-user", methods=["GET"])
