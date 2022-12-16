@@ -36,9 +36,9 @@ def crypto_price(cryptos):
 @app.route('/')
 def home():
     cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
-    # cryptocurrency_prices = crypto_price(cryptos)
+    cryptocurrency_prices = crypto_price(cryptos)
     # print(cryptocurrency_prices)
-    return render_template("index.html")
+    return render_template("index.html", crypto=cryptocurrency_prices)
 
 @app.route('/logout', methods=["GET", "POST"])
 def logout():
