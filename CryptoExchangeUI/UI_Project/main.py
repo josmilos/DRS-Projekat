@@ -36,20 +36,63 @@ def crypto_price(cryptos):
 @app.route('/')
 def home():
     cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
-    # cryptocurrency_prices = crypto_price(cryptos)
+    cryptocurrency_prices = crypto_price(cryptos)
     # print(cryptocurrency_prices)
-    return render_template("index.html")
+    return render_template("index.html", crypto=cryptocurrency_prices)
 
 @app.route('/logout', methods=["GET", "POST"])
 def logout():
     if "user" in session:
         session.pop("user",None)
-    return render_template("index.html")
+    cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
+    cryptocurrency_prices = crypto_price(cryptos)
+    return render_template("index.html", crypto=cryptocurrency_prices)
 
 @app.route('/profil')
 def profil():
     user = session["user"]
     return render_template("profil.html", user=user)
+
+@app.route('/buy', methods=["GET", "POST"])
+def buy():
+    cryptoName=request.form["curencyName"]
+    cryptoValue=request.form["curencyValue"]
+    return render_template("buy.html",cryptoName=cryptoName,cryptoValue=cryptoValue)
+
+@app.route('/buy-transaction', methods=["GET", "POST"])
+def buy_transaction():
+    cryptoName=request.form["curencyName"]
+    cryptoValue=request.form["curencyValue"]
+    amount=request.form["amount"]
+    user=session["user"]
+    email=user["user"]["email"]
+
+    parameters = {
+        "email": email,
+        "curr": cryptoName,
+        "price": cryptoValue,
+        "amount": amount,
+
+    }
+    message="Successfully bought cryptocurrency"
+    data=""
+    try:
+        response = requests.post("http://127.0.0.1:5000/buy-crypto", params=parameters)
+        response.raise_for_status()
+        data = response.json()
+    except:
+        if response.status_code == 200:
+            return render_template("transactionMessage.html",message=data)
+            print(data)
+        elif response.status_code == 400:
+            #print("User already exists")
+            message="Insufficient funds. User does not have enough funds to make this purchase!"
+        elif response.status_code == 500:
+            #print("User not created due to server error")
+            message="Server error"
+
+    return render_template("transactionMessage.html",message=message)
+
 
 @app.route('/edit', methods=["GET", "POST", "PATCH"])
 def edit():
