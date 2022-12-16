@@ -54,7 +54,6 @@ def profil():
     return render_template("profil.html", user=user)
 
 
-
 @app.route('/edit', methods=["GET", "POST", "PATCH"])
 def edit():
     user = session["user"]
