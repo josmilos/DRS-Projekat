@@ -22,6 +22,21 @@
               <a href="/edit">EDIT</a>
         </td>
     </tr>
+    {% if  user["user"]["verified"] == True %}
+    <tr>
+        <td>Add balance </td>
+        <td>
+              <a href="/credit-card">ADD</a>
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td>Add credit card </td>
+        <td>
+              <a href="/credit-card">ADD</a>
+        </td>
+    </tr>
+    {% endif %}
 </table>
 
 

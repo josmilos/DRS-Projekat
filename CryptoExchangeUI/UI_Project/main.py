@@ -54,29 +54,43 @@ def profil():
     return render_template("profil.html", user=user)
 
 
+@app.route('/credit-card', methods=["GET", "POST"])
+def credit_card():
+    if "user" in session:
+        user = session["user"]
+        return render_template("regissterCreditCard.html", user=user)
+    return render_template("login.html")
+
 @app.route('/profile/verification', methods=["GET", "POST"])
 def verification():
-    user = session["user"]
-    email = user["user"]["email"]
-    if request.method == "POST":
-        owner = str(request.form["cowner"])
-        card_number = str(request.form["cnum"])
-        card_date = str(request.form["cdate"])
-        card_cvv = str(request.form["ccvv"])
+    if "user" in session:
+        user = session["user"]
+        email = user["user"]["email"]
+        if request.method == "POST":
+            owner = str(request.form["cowner"])
+            card_number = str(request.form["cnum"])
+            card_date = str(request.form["cdate"])
+            card_cvv = str(request.form["ccvv"])
 
 
-        parameters = {
-            "email": email,
-            "cowner": owner,
-            "cnum": card_number,
-            "cdate": card_date,
-            "ccvv": card_cvv
-        }
+            parameters = {
+                "email": email,
+                "cowner": owner,
+                "cnum": card_number,
+                "cdate": card_date,
+                "ccvv": card_cvv
+            }
+            try:
+                response = requests.patch("http://127.0.0.1:5000/exchange-crypto", params=parameters)
+                response.raise_for_status()
+                data = response.json()
+                print(data)
+            except:
+                message="hy"
 
-        response = requests.patch("http://127.0.0.1:5000/exchange-crypto", params=parameters)
-        response.raise_for_status()
-        data = response.json()
-        print(data)
+    else:
+        return render_template("login.html")
+
 
 
 @app.route('/profile/deposit', methods=["GET", "POST"])
@@ -313,22 +327,25 @@ def login():
             "email": email,
             "pass": password
         }
+        try:
+            response = requests.get("http://127.0.0.1:5000/login-user", params=parameters)
+            response.raise_for_status()
+            data = response.json()
 
-        response = requests.get("http://127.0.0.1:5000/login-user", params=parameters)
-        response.raise_for_status()
-        data = response.json()
+            # if next(iter(data)) == 'response' and response.status_code == 200:
+            #     if next(iter(data["response"])) == 'Success':
+            #         session["user"] = data
 
-        # if next(iter(data)) == 'response' and response.status_code == 200:
-        #     if next(iter(data["response"])) == 'Success':
-        #         session["user"] = data
+            if response.status_code == 200:
+                session["user"] = data
+                print(data)
+        except:
+            #elif response.status_code == 401:
+             #   print("Wrong Credentials")
+            #elif response.status_code == 404:
+            message="User not found"
+            return  render_template("transactionMessage.html",message=message)
 
-        if response.status_code == 200:
-            session["user"] = data
-            print(data)
-        elif response.status_code == 401:
-            print("Wrong Credentials")
-        elif response.status_code == 404:
-            print("User not found")
 
         return render_template("login.html")
     else:    
