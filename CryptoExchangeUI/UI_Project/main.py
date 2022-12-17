@@ -35,8 +35,13 @@ def crypto_price(cryptos):
 
 @app.route('/')
 def home():
-    cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
-    cryptocurrency_prices = crypto_price(cryptos)
+    # cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
+    # cryptocurrency_prices = crypto_price(cryptos)
+    cryptocurrency_prices = {
+        "BTC": 17000,
+        "ETH": 1180,
+        "LTC": 65
+    }
     # print(cryptocurrency_prices)
     return render_template("index.html", crypto=cryptocurrency_prices)
 
@@ -44,8 +49,13 @@ def home():
 def logout():
     if "user" in session:
         session.pop("user",None)
-    cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
-    cryptocurrency_prices = crypto_price(cryptos)
+    # cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
+    # cryptocurrency_prices = crypto_price(cryptos)
+    cryptocurrency_prices = {
+        "BTC": 17000,
+        "ETH": 1180,
+        "LTC": 65
+    }
     return render_template("index.html", crypto=cryptocurrency_prices)
 
 @app.route('/profil')

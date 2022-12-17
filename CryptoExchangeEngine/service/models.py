@@ -30,7 +30,7 @@ class CryptoCurrency(db.Model):
     amount = db.Column(db.Float, nullable=False)
 
     def __repr__(self):
-        return f"CryptoCurrency('{self.hash_id}', '{self.type}', '{self.state}',)"
+        return f"CryptoCurrency('{self.email}', '{self.currency}', '{self.amount}',)"
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
