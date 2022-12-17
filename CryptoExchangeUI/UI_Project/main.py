@@ -80,14 +80,17 @@ def verification():
                 "cdate": card_date,
                 "ccvv": card_cvv
             }
-            try:
-                response = requests.patch("http://127.0.0.1:5000/exchange-crypto", params=parameters)
-                response.raise_for_status()
-                data = response.json()
-                print(data)
-            except:
-                message="hy"
 
+            response = requests.patch("http://127.0.0.1:5000/verify-user", params=parameters)
+            response.raise_for_status()
+            data = response.json()
+            print(data)
+            user["user"]["verified"]=True
+            session["user"]["verisfied"]=user
+
+
+            return render_template("profil.html",user=user)
+        return render_template("profil.html", user=user)
     else:
         return render_template("login.html")
 
