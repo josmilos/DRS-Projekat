@@ -169,11 +169,11 @@ def exchange_crypto():
     usr_email = str(request.args.get("email"))
 
     selling_crypto_currency = str(request.args.get('scurr')).upper()
-    selling_crypto_price = float(request.args.get('sprice'))
-    selling_crypto_amount = float(request.args.get('samount'))
+    selling_crypto_price =5.0 #float(request.args.get('sprice'))
+    selling_crypto_amount =5.0# float(request.args.get('samount'))
 
     buying_crypto_currency = str(request.args.get('bcurr')).upper()
-    buying_crypto_price = float(request.args.get('bprice'))
+    buying_crypto_price =5.0 #float(request.args.get('bprice'))
 
     user = db.session.query(User).filter_by(email=usr_email).first()
     if user:
