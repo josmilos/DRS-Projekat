@@ -1,0 +1,40 @@
+{% extends "base.html" %} {% block title %}Exchange Crypto{% endblock %} {% block content %}
+
+
+<form method="POST" action="/withdraw">
+    <table border="1">
+        <tr>
+        <td colspan="2" align="center">Withdraw</td>
+        <td colspan="2" align="center">Recipient Address</td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">{{ currency }}</td>
+            <input type="hidden" id="curr" name="curr" value="{{ currency }}">
+            <td align="center">
+                <input
+                type="email"
+                class="form-control"
+                id="receiver"
+                name="receiver"
+                placeholder="Enter address">
+            </td>
+        </tr>
+        <tr>
+            <td>Amount</td>
+            <td><input type="number"
+                   id="amount"
+                   class="form-control"
+                   name="amount"
+                   placeholder=" Available {{ balance }}"
+                   step="any"
+                   max="{{ balance }}"
+            />
+            </td>
+            <td><button type="submit" class="btn btn-primary">WITHDRAW</button></td>
+        </tr>
+
+    </table>
+</form>
+
+
+{% endblock %}
