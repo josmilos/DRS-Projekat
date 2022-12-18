@@ -1,0 +1,43 @@
+{% extends "base.html" %} {% block title %}Exchange Crypto{% endblock %} {% block content %}
+
+
+<form method="POST" action="/exchange">
+    <table border="1">
+        <tr>
+        <td>Exchanging From</td>
+            <tr>{{ sellingCurrency }}</tr>
+            <input type="hidden" id="scurr" name="scurr" value="{{ sellingCurrency }}">
+        </tr>
+        <tr>
+        <td>Balance</td>
+            <tr>{{ sellingBalance }}</tr>
+            <input type="number"
+                   id="samount"
+                   class="form-control"
+                   name="samount"
+                   placeholder=" Avlb. {{ sellingBalance }}"
+                   step="any"
+                   max="{{ sellingBalance }}"
+            />
+        </tr>
+        <td>
+            <td>Exchanging To</td>
+            <tr>
+                <select id="bcurr" name="bcurr">
+                    {% for item in buyingCurrency.items() %}
+                    <option value="{{ item }}">{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </tr>
+
+        </td>
+
+          <tr colspan=2>
+
+          <button type="submit" class="btn btn-primary">EXCHANGE</button>
+          </tr>
+    </table>
+</form>
+
+
+{% endblock %}
