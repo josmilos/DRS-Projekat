@@ -196,24 +196,68 @@ def wallet():
 
     return render_template("wallet.html", crypto=data)
 
-@app.route('/buy', methods=["GET", "POST"])
-def buy():
-    cryptoName=request.form["curencyName"]
-    cryptoValue=request.form["curencyValue"]
-    return render_template("buy.html",cryptoName=cryptoName,cryptoValue=cryptoValue)
 
-@app.route('/buy-transaction', methods=["GET", "POST"])
+@app.route('/withdraw-form', methods=["GET", "POST"])
+def withdraw_form():
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        user_crypto = requests.get("http://127.0.0.1:5000/user-cryptocurrencies", params=parameters).json()
+    withdrawing_currency = request.form["currency"]
+    balance = user_crypto[withdrawing_currency]
+    return render_template("withdraw.html", currency=withdrawing_currency, balance=balance)
+
+@app.route('/withdraw', methods=["POST"])
+def withdraw():
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        user = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters).json()
+
+    sender = user["user"]["email"]
+    currency = str(request.form["curr"])
+    amount = float(request.form["amount"])
+    receiver = str(request.form["receiver"])
+
+    parameters = {
+        "sender": sender,
+        "receiver": receiver,
+        "curr": currency,
+        "amount": amount
+    }
+
+    response = requests.patch("http://127.0.0.1:5000/transaction", params=parameters)
+    response.raise_for_status()
+    data = response.json()
+
+    if response.status_code == 200:
+        return render_template("transactionMessage.html", message=data["response"]["Success"])
+
+
+@app.route('/buy-form', methods=["GET", "POST"])
+def buy():
+    currency=request.form["currency"]
+    cryptos = [currency]
+    price = crypto_price(cryptos)[currency]
+    return render_template("buy.html",currency=currency,price=price)
+
+@app.route('/buy-crypto', methods=["GET", "POST"])
 def buy_transaction():
-    cryptoName=request.form["curencyName"]
-    cryptoValue=request.form["curencyValue"]
-    amount=request.form["amount"]
-    user=session["user"]
-    email=user["user"]["email"]
+    user = session["user"]
+
+    currency = str(request.form["currency"])
+    price = float(request.form["price"])
+    amount = float(request.form["amount"])
+    email = user["user"]["email"]
 
     parameters = {
         "email": email,
-        "curr": cryptoName,
-        "price": cryptoValue,
+        "curr": currency,
+        "price": price,
         "amount": amount,
 
     }
@@ -239,9 +283,10 @@ def buy_transaction():
 
 @app.route('/sell-form', methods=["GET", "POST"])
 def sell_form():
-    cryptoName=request.form["curencyName"]
-    cryptoValue=request.form["curencyValue"]
-    return render_template("sell.html",cryptoName=cryptoName,cryptoValue=cryptoValue)
+    currency = request.form["currency"]
+    cryptos = [currency]
+    price = crypto_price(cryptos)[currency]
+    return render_template("sell.html",currency=currency,price=price)
 
 @app.route('/sell-crypto', methods=["GET", "POST"])
 def sell_crypto():
@@ -289,7 +334,7 @@ def exchange_form():
         user_crypto = requests.get("http://127.0.0.1:5000/user-cryptocurrencies", params=parameters).json()
     selling_currency = request.form["currency"]
     selling_balance = user_crypto[selling_currency]
-    buying_currency= SUPPORTED_ASSETS.remove(selling_currency)
+    buying_currency = [crypto for crypto in SUPPORTED_ASSETS if crypto != selling_currency]
     return render_template("exchange.html",sellingCurrency=selling_currency,sellingBalance=selling_balance, buyingCurrency=buying_currency)
 
 
@@ -302,11 +347,11 @@ def exchange():
         }
         user = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters).json()
     if request.method == "POST":
-        selling_currency = request.form["scurr"]
-        selling_price = float(request.form["sprice"])
+        selling_currency = str(request.form["scurr"])
+        selling_price = float(crypto_price([selling_currency])[selling_currency])
         selling_amount = float(request.form["samount"])
-        buying_currency = request.form["bcurr"]
-        buying_price = float(request.form["bprice"])
+        buying_currency = str(request.form["bcurr"])
+        buying_price = float(crypto_price([buying_currency])[buying_currency])
 
         parameters = {
             "email": user_email,
@@ -316,11 +361,13 @@ def exchange():
             "bcurr": buying_currency,
             "bprice": buying_price
         }
+
         response = requests.patch("http://127.0.0.1:5000/exchange-crypto", params=parameters)
         response.raise_for_status()
         data = response.json()
 
-        print(data)
+        if response.status_code == 200:
+            return render_template("transactionMessage.html", message=data["response"]["Success"])
 
 
 @app.route('/edit', methods=["GET", "POST", "PATCH"])
