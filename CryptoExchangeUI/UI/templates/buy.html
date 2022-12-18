@@ -6,16 +6,16 @@ CEX - Buy Page
 
 <br>
 
-<form method="post" action="/buy-transaction">
+<form method="post" action="/buy-crypto">
     <table>
          <tr >
             <td style="text-align: center">
                 <input
                   type="text"
                   class="form-control"
-                  id="curencyName"
-                  name="curencyName"
-                  value={{ cryptoName }}
+                  id="currency"
+                  name="currency"
+                  value={{ currency }}
                   readonly
                   />
             </td>
@@ -23,9 +23,9 @@ CEX - Buy Page
                   <input
                   type="text"
                   class="form-control"
-                  id="curencyValue"
-                  name="curencyValue"
-                  value={{ cryptoValue }}
+                  id="price"
+                  name="price"
+                  value={{ price }}
                   readonly
                   />
             </td>
