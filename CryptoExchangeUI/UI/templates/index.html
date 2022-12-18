@@ -7,12 +7,12 @@ CEX - Home Page
 <br>
 <table border="1" style="width: 25%" >
     <tr>
-        <td>Curency</td>
+        <td>Currency</td>
         <td>Value in $USD</td>
     </tr>
 {% for key,value in crypto.items() %}
 
-<form method="post" action="/buy">
+<form method="post" action="/market">
          <tr >
             <td style="text-align: center">
                 <input
@@ -38,7 +38,8 @@ CEX - Home Page
                   />
             </td>
              {% if "user" in session%}
-             <td><button type="submit" class="btn btn-primary">BUY</button> </td>
+             <td><button type="submit" class="btn btn-primary" formaction="/buy">BUY</button> </td>
+             <td><button type="submit" class="btn btn-primary" formaction="/sell-form">SELL</button> </td>
              {%endif%}
          </tr>
 </form>
