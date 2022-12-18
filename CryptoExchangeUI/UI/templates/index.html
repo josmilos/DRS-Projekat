@@ -18,8 +18,8 @@ CEX - Home Page
                 <input
                   type="text"
                   class="form-control"
-                  id="curencyName"
-                  name="curencyName"
+                  id="currency"
+                  name="currency"
 
                   value={{ key }}
                   readonly
@@ -29,8 +29,8 @@ CEX - Home Page
                   <input
                   type="text"
                   class="form-control"
-                  id="curencyValue"
-                  name="curencyValue"
+                  id="price"
+                  name="price"
 
 
                   value={{ value }}
@@ -38,7 +38,7 @@ CEX - Home Page
                   />
             </td>
              {% if "user" in session%}
-             <td><button type="submit" class="btn btn-primary" formaction="/buy">BUY</button> </td>
+             <td><button type="submit" class="btn btn-primary" formaction="/buy-form">BUY</button> </td>
              <td><button type="submit" class="btn btn-primary" formaction="/sell-form">SELL</button> </td>
              {%endif%}
          </tr>
