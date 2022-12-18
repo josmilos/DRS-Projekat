@@ -4,38 +4,34 @@
 <form method="POST" action="/exchange">
     <table border="1">
         <tr>
-        <td>Exchanging From</td>
-            <tr>{{ sellingCurrency }}</tr>
-            <input type="hidden" id="scurr" name="scurr" value="{{ sellingCurrency }}">
+        <td colspan="2" align="center">Exchange From</td>
+        <td colspan="2" align="center">Exchange To</td>
         </tr>
         <tr>
-        <td>Balance</td>
-            <tr>{{ sellingBalance }}</tr>
-            <input type="number"
-                   id="samount"
-                   class="form-control"
-                   name="samount"
-                   placeholder=" Avlb. {{ sellingBalance }}"
-                   step="any"
-                   max="{{ sellingBalance }}"
-            />
-        </tr>
-        <td>
-            <td>Exchanging To</td>
-            <tr>
+            <td colspan="2" align="center">{{ sellingCurrency }}</td>
+            <input type="hidden" id="scurr" name="scurr" value="{{ sellingCurrency }}">
+            <td align="center">
                 <select id="bcurr" name="bcurr">
-                    {% for item in buyingCurrency.items() %}
+                    {% for item in buyingCurrency %}
                     <option value="{{ item }}">{{ item }}</option>
                     {% endfor %}
                 </select>
-            </tr>
+            </td>
+        </tr>
+        <tr>
+            <td>Amount</td>
+            <td><input type="number"
+                   id="samount"
+                   class="form-control"
+                   name="samount"
+                   placeholder=" Available {{ sellingBalance }}"
+                   step="any"
+                   max="{{ sellingBalance }}"
+            />
+            </td>
+            <td><button type="submit" class="btn btn-primary">EXCHANGE</button></td>
+        </tr>
 
-        </td>
-
-          <tr colspan=2>
-
-          <button type="submit" class="btn btn-primary">EXCHANGE</button>
-          </tr>
     </table>
 </form>
 
