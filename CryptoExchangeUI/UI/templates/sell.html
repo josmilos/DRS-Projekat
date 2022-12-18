@@ -1,0 +1,50 @@
+{% extends "base.html" %} {% block title %}
+CEX - Sell Page
+
+{% endblock %}
+{% block content %}
+
+<br>
+
+<form method="post" action="/sell-crypto">
+    <table>
+         <tr >
+            <td style="text-align: center">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="currency"
+                  name="currency"
+                  value={{ cryptoName }}
+                  readonly
+                  />
+            </td>
+            <td style="text-align: center">
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="price"
+                  name="price"
+                  value={{ cryptoValue }}
+                  readonly
+                  />
+            </td>
+             <td style="text-align: center">
+                  <input
+                  type="number"
+                  class="form-control"
+                  id="amount"
+                  name="amount"
+                  placeholder="Enter amount to sell"
+                  step="any"
+                  />
+            </td>
+
+
+             <td><button type="submit" class="btn btn-primary">SELL</button> </td>
+
+         </tr>
+    </table>
+</form>
+
+{% endblock %}
