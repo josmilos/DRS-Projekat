@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block title %}
-CEX - Home Page
+CEX - MY WALLET
 
 {% endblock %}
 {% block content %}
@@ -8,20 +8,20 @@ CEX - Home Page
 <table border="1" style="width: 25%" >
     <tr>
         <td>Currency</td>
-        <td>Value in $USD</td>
+        <td>Balance</td>
     </tr>
-{% for key,value in crypto.items() %}
+{% for item in crypto %}
 
-<form method="post" action="/market">
+<form method="post" action="/wallet">
          <tr >
             <td style="text-align: center">
                 <input
                   type="text"
                   class="form-control"
-                  id="curencyName"
-                  name="curencyName"
+                  id="currency"
+                  name="currency"
 
-                  value={{ key }}
+                  value="{{ item['currency'] }}"
                   readonly
                   />
             </td>
@@ -29,17 +29,23 @@ CEX - Home Page
                   <input
                   type="text"
                   class="form-control"
-                  id="curencyValue"
-                  name="curencyValue"
+                  id="balance"
+                  name="balance"
 
 
-                  value={{ value }}
+                  value="{{ item['amount'] }}"
                   readonly
                   />
             </td>
+             <td>
+
+             </td>
+
              {% if "user" in session%}
              <td><button type="submit" class="btn btn-primary" formaction="/buy">BUY</button> </td>
              <td><button type="submit" class="btn btn-primary" formaction="/sell-form">SELL</button> </td>
+             <td><button type="submit" class="btn btn-primary" formaction="/withdraw-form">WITHDRAW</button> </td>
+             <td><button type="submit" class="btn btn-primary" formaction="/exchange-form">EXCHANGE</button> </td>
              {%endif%}
          </tr>
 </form>

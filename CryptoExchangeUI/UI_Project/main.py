@@ -7,7 +7,7 @@ import requests
 CMC_ENDPOINT = "https://pro-api.coinmarketcap.com"
 CMC_PRO_API_KEY = "a05ec627-fb01-4d24-84fb-52034219b16b"
 
- 
+SUPPORTED_ASSETS = ["BTC", "ETH", "LTC"]
 
 template_dir = os.path.abspath('../UI/templates')
 
@@ -17,31 +17,48 @@ app = Flask(__name__, template_folder=template_dir)
 app.secret_key="key"
 
 
+# REAL-TIME CRYPTOCURRENCY PRICE LOADER
+# def crypto_price(cryptos):
+#     return_price = {}
+#     for crypto in cryptos:
+#         parameters = {
+#             "amount": 1,
+#             "symbol": crypto,
+#             "convert": "USD",
+#             "CMC_PRO_API_KEY": CMC_PRO_API_KEY
+#         }
+#         response = requests.get(CMC_ENDPOINT + "/v2/tools/price-conversion", params=parameters)
+#         price = response.json()["data"][0]["quote"]["USD"]["price"]
+#         return_price[crypto] = round(price, 2)
+#
+#     return return_price
+
 def crypto_price(cryptos):
     return_price = {}
     for crypto in cryptos:
-        parameters = {
-            "amount": 1,
-            "symbol": crypto,
-            "convert": "USD",
-            "CMC_PRO_API_KEY": CMC_PRO_API_KEY
-        }
-        response = requests.get(CMC_ENDPOINT + "/v2/tools/price-conversion", params=parameters)
-        price = response.json()["data"][0]["quote"]["USD"]["price"]
-        return_price[crypto] = round(price, 2)
+        # parameters = {
+        #     "amount": 1,
+        #     "symbol": crypto,
+        #     "convert": "USD",
+        #     "CMC_PRO_API_KEY": CMC_PRO_API_KEY
+        # }
+        # response = requests.get(CMC_ENDPOINT + "/v2/tools/price-conversion", params=parameters)
+        # price = response.json()["data"][0]["quote"]["USD"]["price"]
+        # return_price[crypto] = round(price, 2)
+        return_price[crypto] = 100
 
     return return_price
 
 
 @app.route('/')
 def home():
-    # cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
-    # cryptocurrency_prices = crypto_price(cryptos)
-    cryptocurrency_prices = {
-        "BTC": 17000,
-        "ETH": 1180,
-        "LTC": 65
-    }
+    cryptos = ["BTC", "ETH", "LTC", "BNB", "DOGE"]
+    cryptocurrency_prices = crypto_price(cryptos)
+    # cryptocurrency_prices = {
+    #     "BTC": 17000,
+    #     "ETH": 1180,
+    #     "LTC": 65
+    # }
     # print(cryptocurrency_prices)
     return render_template("index.html", crypto=cryptocurrency_prices)
 
@@ -58,9 +75,15 @@ def logout():
     }
     return render_template("index.html", crypto=cryptocurrency_prices)
 
+
 @app.route('/profil')
 def profil():
-    user = session["user"]
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        user = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters).json()
     return render_template("profil.html", user=user)
 
 
@@ -74,8 +97,11 @@ def credit_card():
 @app.route('/profile/verification', methods=["GET", "POST"])
 def verification():
     if "user" in session:
-        user = session["user"]
-        email = user["user"]["email"]
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        user = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters).json()
         if request.method == "POST":
             owner = str(request.form["cowner"])
             card_number = str(request.form["cnum"])
@@ -84,7 +110,7 @@ def verification():
 
 
             parameters = {
-                "email": email,
+                "email": user_email,
                 "cowner": owner,
                 "cnum": card_number,
                 "cdate": card_date,
@@ -95,8 +121,8 @@ def verification():
             response.raise_for_status()
             data = response.json()
             print(data)
-            user["user"]["verified"]=True
-            session["user"]["verisfied"]=user
+            # user["user"]["verified"]=True
+            # session["user"]["verisfied"]=user POTREBNO RAZJASNJENJE ####################################################
 
 
             return render_template("profil.html",user=user)
@@ -133,12 +159,16 @@ def deposit():
 
 @app.route('/profile/transaction-history', methods=["GET"])
 def transaction_history():
-    user = session["user"]
-    email = user["user"]["email"]
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        user = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters).json()
 
-    parameters = {
-        "email": email
-    }
+    # parameters = {
+    #     "email": email
+    # }
     response = requests.get("http://127.0.0.1:5000/user-transactions", params=parameters)
     response.raise_for_status()
     data = response.json()
@@ -148,17 +178,23 @@ def transaction_history():
 
 @app.route('/profile/wallet', methods=["GET"])
 def wallet():
-    user = session["user"]
-    email = user["user"]["email"]
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        user = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters).json()
 
-    parameters = {
-        "email": email
-    }
+    # parameters = {
+    #     "email": user["user"]["email"]
+    # }
     response = requests.get("http://127.0.0.1:5000/user-cryptocurrencies", params=parameters)
     response.raise_for_status()
     data = response.json()
 
-    print(data)
+    # Need to implement calculation of total amount in $ held in each asset and show on UI
+
+    return render_template("wallet.html", crypto=data)
 
 @app.route('/buy', methods=["GET", "POST"])
 def buy():
@@ -201,35 +237,70 @@ def buy_transaction():
     return render_template("transactionMessage.html",message=message)
 
 
+@app.route('/sell-form', methods=["GET", "POST"])
+def sell_form():
+    cryptoName=request.form["curencyName"]
+    cryptoValue=request.form["curencyValue"]
+    return render_template("sell.html",cryptoName=cryptoName,cryptoValue=cryptoValue)
 
-
-@app.route('/sell-crypto', methods=["GET", "POST", "PATCH"])
+@app.route('/sell-crypto', methods=["GET", "POST"])
 def sell_crypto():
     user = session["user"]
 
-    if request.method == "POST":
-        currency = str(request.form["currency"])
-        price = float(request.form["price"])
-        amount = float(request.form["amount"])
-        email = user["user"]["email"]
+    currency = str(request.form["currency"])
+    price = float(request.form["price"])
+    amount = float(request.form["amount"])
+    email = user["user"]["email"]
 
-        parameters = {
-            "email": email,
-            "curr": currency,
-            "price": price,
-            "amount": amount
-        }
+    parameters = {
+        "email": email,
+        "curr": currency,
+        "price": price,
+        "amount": amount
+    }
+
+    message = "Successfully sold cryptocurrency"
+    data = ""
+    try:
         response = requests.patch("http://127.0.0.1:5000/sell-crypto", params=parameters)
         response.raise_for_status()
         data = response.json()
+    except:
+        if response.status_code == 200:
+            return render_template("transactionMessage.html", message=data)
+            print(data)
+        elif response.status_code == 400:
+            # print("User already exists")
+            message = "Insufficient funds. User does not have enough crypto to sell!"
+        elif response.status_code == 500:
+            # print("User not created due to server error")
+            message = "Server error"
 
-        print(data)
+    return render_template("transactionMessage.html", message=message)
+
+
+@app.route('/exchange-form', methods=["GET", "POST"])
+def exchange_form():
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        user_crypto = requests.get("http://127.0.0.1:5000/user-cryptocurrencies", params=parameters).json()
+    selling_currency = request.form["currency"]
+    selling_balance = user_crypto[selling_currency]
+    buying_currency= SUPPORTED_ASSETS.remove(selling_currency)
+    return render_template("exchange.html",sellingCurrency=selling_currency,sellingBalance=selling_balance, buyingCurrency=buying_currency)
 
 
 @app.route('/exchange', methods=["GET", "POST", "PATCH"])
 def exchange():
-    user = session["user"]
-    email = user["user"]["email"]
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        user = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters).json()
     if request.method == "POST":
         selling_currency = request.form["scurr"]
         selling_price = float(request.form["sprice"])
@@ -238,7 +309,7 @@ def exchange():
         buying_price = float(request.form["bprice"])
 
         parameters = {
-            "email": email,
+            "email": user_email,
             "scurr": selling_currency,
             "sprice": selling_price,
             "samount": selling_amount,
@@ -254,7 +325,12 @@ def exchange():
 
 @app.route('/edit', methods=["GET", "POST", "PATCH"])
 def edit():
-    user = session["user"]
+    user_email = session["user"]["user"]["email"]
+    parameters = {
+        "email": user_email
+    }
+    user = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters).json()
+
     if request.method == "POST":
         name = request.form["name"]
         surname = request.form["surname"]
@@ -329,8 +405,12 @@ def register():
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if "user" in session:
-        user=session["user"]
-        return render_template("index.html")
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        user = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters).json()
+        return redirect("/")
     if request.method == "POST":
         
         email=request.form["email"]
@@ -351,7 +431,7 @@ def login():
 
             if response.status_code == 200:
                 session["user"] = data
-                print(data)
+            return redirect("/")
         except:
             #elif response.status_code == 401:
              #   print("Wrong Credentials")
