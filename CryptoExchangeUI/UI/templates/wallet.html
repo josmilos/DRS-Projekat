@@ -10,7 +10,7 @@ CEX - MY WALLET
         <td>Currency</td>
         <td>Balance</td>
     </tr>
-{% for item in crypto %}
+{% for key,value in crypto.items() %}
 
 <form method="post" action="/wallet">
          <tr >
@@ -21,7 +21,7 @@ CEX - MY WALLET
                   id="currency"
                   name="currency"
 
-                  value="{{ item['currency'] }}"
+                  value="{{ key }}"
                   readonly
                   />
             </td>
@@ -33,7 +33,7 @@ CEX - MY WALLET
                   name="balance"
 
 
-                  value="{{ item['amount'] }}"
+                  value="{{ value }}"
                   readonly
                   />
             </td>
