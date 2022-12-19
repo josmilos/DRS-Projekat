@@ -1,0 +1,20 @@
+{% extends "base.html" %} {% block title %}
+CEX - User transactions  Page
+
+{% endblock %}
+{% block content %}
+
+
+<table border="1">
+{% for var in transactions %}
+    <tr>
+{% for  key,value in var.items() %}
+        <td>{{value}}</td>
+
+{% endfor %}
+    </tr>
+{% endfor %}
+</table>
+
+
+{% endblock %}
