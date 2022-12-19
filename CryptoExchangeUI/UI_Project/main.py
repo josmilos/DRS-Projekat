@@ -175,6 +175,19 @@ def transaction_history():
 
     print(data)
 
+@app.route('/user-transactions', methods=["GET", "POST"])
+def user_transactions():
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        response = requests.get("http://127.0.0.1:5000/user-transactions", params=parameters).json()
+
+
+
+    return render_template("userTransactions.html",transactions=response)
+
 
 @app.route('/profile/wallet', methods=["GET"])
 def wallet():
