@@ -1,0 +1,76 @@
+{% extends "base.html" %} {% block title %}Credit card Page{% endblock %} {% block content %}
+
+
+<form method="POST" action="/profile/deposit">
+    <table border="1">
+        <tr>
+            <td>Full name</td>
+            <td>
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="cowner"
+                  name="cowner"
+                  placeholder="Enter full name"
+                  />
+            </td>
+        </tr>
+        <tr>
+            <td>Card number</td>
+            <td>
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="cnum"
+                  name="cnum"
+                  placeholder="Enter card number"
+                  />
+            </td>
+        </tr>
+        <tr>
+            <td>Expire date</td>
+            <td>
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="cdate"
+                  name="cdate"
+                  placeholder="Enter expire date"
+                  />
+            </td>
+        </tr>
+        <tr>
+            <td>Security code</td>
+            <td>
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="ccvv"
+                  name="ccvv"
+                  placeholder="Enter adress"
+                  />
+            </td>
+        </tr>
+        <tr>
+            <td>Amount</td>
+            <td>
+                  <input
+                  type="number"
+                  class="form-control"
+                  id="amount"
+                  name="amount"
+                  placeholder="Enter amount"
+                  step="any"
+                  />
+            </td>
+        </tr>
+
+          <tr colspan=2>
+
+          <button type="submit" class="btn btn-primary">Add balance</button>
+          </tr>
+    </table>
+</form>
+
+
+{% endblock %}
