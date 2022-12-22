@@ -203,6 +203,34 @@ def user_transactions():
 
     return render_template("userTransactions.html",transactions=response)
 
+@app.route('/user-transactions-filter', methods=["GET", "POST"])
+def user_transactions_filter():
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        filterType = request.form["filterType"]
+        filterKey = request.form["filterKey"]
+        parameters = {
+            "email": user_email
+        }
+        response = requests.get("http://127.0.0.1:5000/user-transactions", params=parameters).json()
+
+        filterList=[]
+        if filterType == "email":
+            for item  in response:
+                if item["sender_email"] == filterKey or item["receiver_email"] == filterKey:
+                    filterList.append(item)
+
+        elif filterType == "curency":
+            for item  in response:
+                if item["currency"] == filterKey:
+                    filterList.append(item)
+        elif filterType == "transactionType":
+            for item  in response:
+                if item["type"] == filterKey:
+                    filterList.append(item)
+
+    return render_template("userTransactions.html",transactions=filterList)
+
 
 @app.route('/profile/wallet', methods=["GET"])
 def wallet():
