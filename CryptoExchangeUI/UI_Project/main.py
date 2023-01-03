@@ -317,14 +317,16 @@ def buy_transaction():
 
     currency = str(request.form["currency"])
     price = float(request.form["price"])
-    amount = float(request.form["amount"])
+    from_amount = float(request.form["fromamount"])
+    to_amount = float(request.form["toamount"])
     email = user["user"]["email"]
 
     parameters = {
         "email": email,
         "curr": currency,
         "price": price,
-        "amount": amount,
+        "from_amount": from_amount,
+        "to_amount": to_amount
 
     }
     message="Successfully bought cryptocurrency"

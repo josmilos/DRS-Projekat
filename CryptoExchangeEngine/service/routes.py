@@ -1,7 +1,7 @@
 from flask import request, jsonify, render_template
 from CryptoExchangeEngine.service import app, db
 from CryptoExchangeEngine.service.models import User, Transaction, CryptoCurrency
-from CryptoExchangeEngine.service.functions import validate_card, hash_function, process_transaction
+from CryptoExchangeEngine.service.functions import validate_card, hash_function, initiate_transaction
 
 
 @app.route("/")
@@ -32,7 +32,6 @@ def user_transactions():
     for trx in receiver_transactions:
         temp = trx.to_dict()
         transactions_list.append(temp)
-    print(transactions_list)
     return jsonify(transactions_list), 200
 
 
@@ -60,8 +59,6 @@ def user_cryptocurrencies():
         temp = crypto.to_dict()
         if float(temp["amount"]) > 0:
             owned_currency[temp["currency"]] = temp["amount"]
-            #owned_list.append({temp["currency"] : temp["amount"] })
-    print(jsonify(owned_currency))
     return jsonify(owned_currency), 200
 
 
@@ -114,14 +111,15 @@ def add_new_user():
 @app.route("/buy-crypto", methods=["POST", "PATCH"])
 def buy_crypto():
     usr_email = str(request.args.get("email"))
-    crypto_currency = str(request.args.get('curr')).upper()
+    to_currency = str(request.args.get('curr')).upper()
     crypto_price = float(request.args.get('price'))
-    crypto_amount = float(request.args.get('amount'))
+    from_amount = float(request.args.get('from_amount'))
+    to_amount = float(request.args.get('to_amount'))
 
     user = db.session.query(User).filter_by(email=usr_email).first()
     if user:
         if user.verified:
-            total_price = crypto_price * crypto_amount
+            total_price = crypto_price * to_amount
             if total_price > user.balance:
                 return jsonify(error={"Error": "Insufficient funds. User does not have enough funds to make this purchase!"}), 400
             else:
@@ -130,25 +128,26 @@ def buy_crypto():
                 new_transaction = Transaction(
                     type="BUY",
                     state="PROCESSED",
-                    currency=crypto_currency.upper(),
+                    from_currency="USD",
+                    to_currency=to_currency.upper(),
                     sender_email=usr_email,
-                    amount=crypto_amount
+                    amount=to_amount
                 )
                 db.session.add(new_transaction)
                 user_balance = db.session.query(CryptoCurrency).filter_by(email=usr_email,
-                                                                            currency=crypto_currency.upper()).first()
+                                                                            currency=to_currency.upper()).first()
                 if user_balance:
-                    user_balance.amount += crypto_amount
+                    user_balance.amount += to_amount
                 else:
                     new_currency = CryptoCurrency(
                         email=usr_email,
-                        currency=crypto_currency.upper(),
-                        amount=crypto_amount
+                        currency=to_currency.upper(),
+                        amount=to_amount
                     )
 
                     db.session.add(new_currency)
             db.session.commit()
-            return jsonify(response={"Success": f"Successfully bought cryptocurrency {crypto_currency}, amount {crypto_amount} at price {crypto_price}"})
+            return jsonify(response={"Success": f"Successfully bought cryptocurrency {to_currency}, amount {to_amount} at price {crypto_price}"})
         else:
             return jsonify(
                 error={"Error": f"This user is not verified. Crypto trades could not be made before verification!"}), 400
@@ -176,7 +175,8 @@ def sell_crypto():
                     new_transaction = Transaction(
                         type="SELL",
                         state="PROCESSED",
-                        currency=crypto_currency.upper(),
+                        from_currency=crypto_currency.upper(),
+                        to_currency="USD",
                         sender_email=usr_email,
                         amount=crypto_amount
                     )
@@ -204,11 +204,12 @@ def exchange_crypto():
     usr_email = str(request.args.get("email"))
 
     selling_crypto_currency = str(request.args.get('scurr')).upper()
-    selling_crypto_price = float(request.args.get('sprice'))
+    # selling_crypto_price = float(request.args.get('sprice'))
     selling_crypto_amount = float(request.args.get('samount'))
 
     buying_crypto_currency = str(request.args.get('bcurr')).upper()
-    buying_crypto_price = float(request.args.get('bprice'))
+    # buying_crypto_price = float(request.args.get('bprice'))
+    buying_crypto_amount = float(request.args.get('bamount'))
 
     user = db.session.query(User).filter_by(email=usr_email).first()
     if user:
@@ -225,40 +226,44 @@ def exchange_crypto():
                     return jsonify(error={
                         "Error": f"Insufficient funds. User does not have enough crypto {selling_crypto_currency}!"}), 400
                 else:
-                    cash = selling_crypto_amount * selling_crypto_price
-                    exchanged_crypto = cash / buying_crypto_price
+                    # cash = selling_crypto_amount * selling_crypto_price
+                    # exchanged_crypto = cash / buying_crypto_price
                     selling_currency_balance.amount -= selling_crypto_amount
 
-                    if buying_currency_balance:
-                        buying_currency_balance.amount += exchanged_crypto
-                    else:
-                        new_crypto = CryptoCurrency(
-                            email=usr_email,
-                            currency=buying_crypto_currency.upper(),
-                            amount=exchanged_crypto
-                        )
-                        db.session.add(new_crypto)
+                    # if buying_currency_balance:
+                    #     buying_currency_balance.amount += buying_crypto_amount
+                    # else:
+                    #     new_crypto = CryptoCurrency(
+                    #         email=usr_email,
+                    #         currency=buying_crypto_currency.upper(),
+                    #         amount=buying_crypto_amount
+                    #     )
+                    #     db.session.add(new_crypto)
 
-                    new_transaction_from = Transaction(
-                        type="EXCHANGEFROM",
-                        state="PROCESSED",
-                        currency=selling_crypto_currency,
-                        sender_email=usr_email,
-                        amount=selling_crypto_amount
-                    )
-                    db.session.add(new_transaction_from)
 
-                    new_transaction_to = Transaction(
-                        type="EXCHANGETO",
-                        state="PROCESSED",
-                        currency=buying_crypto_currency,
-                        sender_email=usr_email,
-                        amount=exchanged_crypto
-                    )
-                    db.session.add(new_transaction_to)
+                    # new_transaction_from = Transaction(
+                    #     type="EXCHANGE",
+                    #     state="PROCESSED",
+                    #     currency=selling_crypto_currency,
+                    #     sender_email=usr_email,
+                    #     amount=selling_crypto_amount
+                    # )
+                    # db.session.add(new_transaction_from)
+                    #
+                    # new_transaction_to = Transaction(
+                    #     type="EXCHANGETO",
+                    #     state="PROCESSED",
+                    #     currency=buying_crypto_currency,
+                    #     sender_email=usr_email,
+                    #     amount=exchanged_crypto
+                    # )
+                    # db.session.add(new_transaction_to)
                     db.session.commit()
+                    initiate_transaction(usr_email, usr_email, amount, crypto_currency, tr_type="WITHDRAW",
+                                         state="PROCESSING")
+
                     return jsonify(response={
-                        "Success": f"Successfully traded cryptocurrency {selling_crypto_currency}, amount {selling_crypto_amount} for cryptocurrency {buying_crypto_currency}, amount {exchanged_crypto}"}), 200
+                        "Success": f"Successfully traded cryptocurrency {selling_crypto_currency}, amount {selling_crypto_amount} for cryptocurrency {buying_crypto_currency}"}), 200
         else:
             return jsonify(
                 error={"Error": f"This user is not verified. Crypto trades could not be made before verification!"}), 400
@@ -347,8 +352,7 @@ def deposit():
                 return jsonify(error={"Error": f"Card owner does not match with this user account"}), 400
             else:
                 if validate_card(c_number, c_date, c_cvv):
-                    # Here should be implemented adding to the transaction database
-                    user.balance = amount
+                    user.balance += amount
                     new_transaction = Transaction(
                         type="DEPOSIT",
                         state="PROCESSED",
@@ -389,11 +393,11 @@ def transaction():
                 if new_balance < 0:
                     return jsonify(error={"Error": f"Sender has insufficient balance to perform requested transaction. Requested: {amount}  Available: {sender_balance.amount}"}), 400
                 else:
-                    hashed_id = hash_function({"sender": sender, "receiver": receiver, "amount": amount})
+                    # hashed_id = hash_function({"sender": sender, "receiver": receiver, "amount": amount})
                     sender_balance.amount = new_balance
                     db.session.commit()
-                    process_transaction(hashed_id, sender, receiver, amount, crypto_currency, tr_type="WITHDRAW", state="PROCESSING")
-                    return jsonify(response={"Success": f"Transaction with id: {hashed_id} has been successfully initiated"}), 200
+                    initiate_transaction(sender, receiver, amount, crypto_currency, tr_type="WITHDRAW", state="PROCESSING")
+                    return jsonify(response={"Success": f"Transaction has been successfully initiated"}), 200
             else:
                 return jsonify(
                     error={
