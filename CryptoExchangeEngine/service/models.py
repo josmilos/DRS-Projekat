@@ -10,7 +10,7 @@ class User(db.Model):
     surname = db.Column(db.String(50), nullable=False)
     address = db.Column(db.String(150), nullable=False)
     phone = db.Column(db.String(20), unique=True, nullable=False)
-    balance = db.Column(db.Float, nullable=False, default=0)
+    # balance = db.Column(db.Float, nullable=False, default=0)
     verified = db.Column(db.Boolean, nullable=False, default=False)
 
     transactions = db.relationship('Transaction', backref='user', lazy=True)
@@ -42,13 +42,12 @@ class Transaction(db.Model):
     time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     type = db.Column(db.String(10), nullable=False) # type =  DEPOSIT || WITHDRAW || VERIFY || BUY || SELL || EXCHANGE
     from_amount = db.Column(db.Float, nullable=False)
-    from_currency = db.Column(db.String(30), nullable=True)
-    to_amount = db.Column(db.Float, nullable=False)
+    from_currency = db.Column(db.String(30), nullable=False)
+    to_amount = db.Column(db.Float, nullable=True)
     to_currency = db.Column(db.String(30), nullable=True)
     state = db.Column(db.String(15), nullable=False) # state = PROCESSING || DENIED || PROCESSED
     sender_email = db.Column(db.String(150), db.ForeignKey('user.id'), nullable=False)
     receiver_email = db.Column(db.String(150), nullable=True)
-
 
     def __repr__(self):
         return f"Transaction('{self.hash_id}', '{self.type}', '{self.state}',)"
