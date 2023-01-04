@@ -93,7 +93,7 @@ def add_new_user():
         surname=request.args.get('surname'),
         address=request.args.get('addr'),
         phone=request.args.get('ph'),
-        balance=float(0),
+        #balance=float(0),
         verified=False
     )
     try:
@@ -126,7 +126,7 @@ def buy_crypto():
                 initiate_transaction(sender=usr_email, receiver=usr_email, from_amount=from_amount,
                                      to_amount=to_amount, from_currency="USD",
                                      to_currency=to_currency, tr_type="BUY",
-                                     state="PROCESSED")
+                                     state="PROCESSING")
             db.session.commit()
             return jsonify(response={
                 "Success": f"Successfully bought cryptocurrency {to_amount}{to_currency} for {from_amount}USD"}), 200
@@ -158,10 +158,10 @@ def sell_crypto():
                     initiate_transaction(sender=usr_email, receiver=usr_email, from_amount=from_amount,
                                          to_amount=to_amount, from_currency=from_currency,
                                          to_currency="USD", tr_type="SELL",
-                                         state="PROCESSED")
+                                         state="PROCESSING")
 
                     db.session.commit()
-
+                    # doraditi ovaj response
                     return jsonify(response={
                         "Success": f"Successfully sold cryptocurrency {from_currency}, amount {from_amount} for {to_amount}USD"}), 200
                 else:
@@ -207,15 +207,15 @@ def exchange_crypto():
                     db.session.commit()
                     initiate_transaction(sender=usr_email, receiver=usr_email, from_amount=selling_crypto_amount,
                                          to_amount=buying_crypto_amount, from_currency=selling_crypto_currency,
-                                         to_currency=buying_crypto_currency, tr_type="WITHDRAW",
+                                         to_currency=buying_crypto_currency, tr_type="EXCHANGE",
                                          state="PROCESSING")
-
+                    # Potrebno doraditi ovaj response
                     return jsonify(response={
                         "Success": f"Successfully traded cryptocurrency {selling_crypto_currency},"
                                    f" amount {selling_crypto_amount} for cryptocurrency {buying_crypto_currency}"}), 200
         else:
             return jsonify(
-                error={"Error": f"This user is not verified. Crypto trades could not be made before verification!"}), \
+                error={"Error": f"This user is not verified. Crypto trades can not be made before verification!"}), \
                    400
     else:
         return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
@@ -273,9 +273,9 @@ def verify_user():
                 new_transaction = Transaction(
                     type="VERIFY",
                     state="PROCESSED",
-                    currency="USD",
+                    from_amount=1,
+                    from_currency="USD",
                     sender_email=user.email,
-                    amount=1
                 )
                 db.session.add(new_transaction)
                 db.session.commit()
@@ -306,9 +306,9 @@ def deposit():
                     new_transaction = Transaction(
                         type="DEPOSIT",
                         state="PROCESSED",
-                        currency="USD",
+                        from_amount=amount,
+                        from_currency="USD",
                         sender_email=user.email,
-                        amount=amount
                     )
                     db.session.add(new_transaction)
                     db.session.commit()
@@ -347,7 +347,9 @@ def transaction():
                     # hashed_id = hash_function({"sender": sender, "receiver": receiver, "amount": amount})
                     sender_balance.amount = new_balance
                     db.session.commit()
-                    initiate_transaction(sender, receiver, amount, crypto_currency, tr_type="WITHDRAW",
+                    initiate_transaction(sender=sender, receiver=receiver, from_amount=amount,
+                                         to_amount=amount, from_currency=crypto_currency,
+                                         to_currency=crypto_currency, tr_type="WITHDRAW",
                                          state="PROCESSING")
                     return jsonify(response={"Success": f"Transaction has been successfully initiated"}), 200
             else:
@@ -364,7 +366,10 @@ def transaction():
                 new_transaction = Transaction(
                     type="WITHDRAW",
                     state="PROCESSED",
-                    currency="USD",
+                    from_amount=amount,
+                    from_currency="USD",
+                    to_amount=amount,
+                    to_currency="USD",
                     sender_email=user_sender.email,
                     receiver_email=user_receiver.email,
                     amount=amount

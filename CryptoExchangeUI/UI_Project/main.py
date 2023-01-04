@@ -311,20 +311,20 @@ def buy():
     price = crypto_price(cryptos)[currency]
     return render_template("buy.html",currency=currency,price=price)
 
+
 @app.route('/buy-crypto', methods=["GET", "POST"])
 def buy_transaction():
     user = session["user"]
 
-    currency = str(request.form["currency"])
+    currency = str(request.form["currency"]).upper()
     price = float(request.form["price"])
-    from_amount = float(request.form["fromamount"])
     to_amount = float(request.form["toamount"])
+    from_amount = to_amount * float(price)
     email = user["user"]["email"]
 
     parameters = {
         "email": email,
         "curr": currency,
-        "price": price,
         "from_amount": from_amount,
         "to_amount": to_amount
 
@@ -353,20 +353,24 @@ def sell_form():
     price = crypto_price(cryptos)[currency]
     return render_template("sell.html",currency=currency,price=price)
 
+
 @app.route('/sell-crypto', methods=["GET", "POST"])
 def sell_crypto():
     user = session["user"]
 
-    currency = str(request.form["currency"])
+    currency = str(request.form["currency"]).upper()
     price = float(request.form["price"])
-    amount = float(request.form["amount"])
+    from_amount = float(request.form["fromamount"])
+    to_amount = from_amount * float(price)
+
     email = user["user"]["email"]
 
     parameters = {
         "email": email,
         "curr": currency,
-        "price": price,
-        "amount": amount
+        "from_amount": from_amount,
+        "to_amount": to_amount
+
     }
 
     message = "Successfully sold cryptocurrency"

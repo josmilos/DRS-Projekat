@@ -50,7 +50,7 @@ def process_transaction(hashed_id, sender, receiver, from_amount, to_amount, fro
     db.session.add(new_transaction)
     db.session.commit()
     # After 5 minutes these actions below will be taken
-    time.sleep(300)
+    time.sleep(3)
     receiver_balance = db.session.query(CryptoCurrency).filter_by(email=receiver, currency=to_currency).first()
     if receiver_balance:
         receiver_balance.amount += to_amount
