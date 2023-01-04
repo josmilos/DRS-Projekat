@@ -163,14 +163,14 @@ def sell_crypto():
                     db.session.commit()
 
                     return jsonify(response={
-                        "Success": f"Successfully sold cryptocurrency {crypto_currency}, amount {crypto_amount} at price {crypto_price}"}), 200
+                        "Success": f"Successfully sold cryptocurrency {from_currency}, amount {from_amount} for {to_amount}USD"}), 200
                 else:
                     return jsonify(error={
                         "Error": "Insufficient funds. User does not have enough crypto to sell!"}), 400
             else:
                 return jsonify(
                     error={
-                        "Error": f"Cryptocurrency not owned. User does not own cryptocurrency {crypto_currency}!"}), 400
+                        "Error": f"Cryptocurrency not owned. User does not own cryptocurrency {from_currency}!"}), 400
         else:
             return jsonify(
                 error={
