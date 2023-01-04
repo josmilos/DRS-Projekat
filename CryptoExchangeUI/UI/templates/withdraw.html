@@ -16,7 +16,8 @@
                 class="form-control"
                 id="receiver"
                 name="receiver"
-                placeholder="Enter address">
+                placeholder="Enter address"
+                required>
             </td>
         </tr>
         <tr>
@@ -28,6 +29,8 @@
                    placeholder=" Available {{ balance }}"
                    step="any"
                    max="{{ balance }}"
+                       required
+
             />
             </td>
             <td><button type="submit" class="btn btn-primary">WITHDRAW</button></td>

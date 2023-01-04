@@ -1,0 +1,54 @@
+{% extends "base.html" %} {% block title %}
+CEX - User transactions  Page
+
+{% endblock %}
+{% block content %}
+
+<br>
+<form method="post" action="/user-transactions-filter">
+    <table >
+        <tr>
+            <td>
+                Filter by:
+            </td>
+            <td>
+
+                <select id="filterType" name="filterType">
+                    <option value="email">Email</option>
+                    <option value="curency">Curency</option>
+                    <option value="transactionType">Transaction type</option>
+
+                </select>
+
+            </td>
+            <td>
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="filterKey"
+                  name="filterKey"
+                  placeholder="Enter filter key"
+                  required
+                  />
+            </td>
+            <td>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </td>
+        </tr>
+    </table>
+</form>
+<br>
+<button><a href="/user-transactions">Reset</a></button>
+<table border="1">
+{% for var in transactions %}
+    <tr>
+{% for  key,value in var.items() %}
+        <td>{{value}}</td>
+
+{% endfor %}
+    </tr>
+{% endfor %}
+</table>
+
+
+{% endblock %}

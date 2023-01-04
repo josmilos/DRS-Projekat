@@ -118,12 +118,16 @@ def verification():
             }
 
             response = requests.patch("http://127.0.0.1:5000/verify-user", params=parameters)
-            response.raise_for_status()
-            data = response.json()
-            print(data)
+            try:
+                response.raise_for_status()
+                data = response.json()
+                print(data)
             # user["user"]["verified"]=True
             # session["user"]["verisfied"]=user POTREBNO RAZJASNJENJE ####################################################
-
+            except Exception as e:
+                data2 = response.json()
+                print(data2)
+                return render_template("transactionMessage.html", message=data2["error"]["Error"])
 
             return render_template("profil.html",user=user)
         return render_template("profil.html", user=user)
@@ -152,10 +156,21 @@ def deposit():
             "amount": amount
         }
         response = requests.post("http://127.0.0.1:5000/deposit", params=parameters)
-        response.raise_for_status()
-        data = response.json()
-        print(data)
+        try:
 
+            response.raise_for_status()
+            data = response.json()
+            print(data)
+        except Exception as e:
+            data2 = response.json()
+            print(data2)
+            return  render_template("transactionMessage.html",message=data2["error"]["Error"])
+        parameters2 = {
+            "email": email
+        }
+        user2 = requests.get("http://127.0.0.1:5000/search-user-by-email", params=parameters2).json()
+        return render_template("profil.html", user=user2)
+    return render_template("deposit.html", user=user)
 
 @app.route('/profile/transaction-history', methods=["GET"])
 def transaction_history():
@@ -175,6 +190,47 @@ def transaction_history():
 
     print(data)
 
+@app.route('/user-transactions', methods=["GET", "POST"])
+def user_transactions():
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        parameters = {
+            "email": user_email
+        }
+        response = requests.get("http://127.0.0.1:5000/user-transactions", params=parameters).json()
+
+
+
+    return render_template("userTransactions.html",transactions=response)
+
+@app.route('/user-transactions-filter', methods=["GET", "POST"])
+def user_transactions_filter():
+    if "user" in session:
+        user_email = session["user"]["user"]["email"]
+        filterType = request.form["filterType"]
+        filterKey = request.form["filterKey"]
+        parameters = {
+            "email": user_email
+        }
+        response = requests.get("http://127.0.0.1:5000/user-transactions", params=parameters).json()
+
+        filterList=[]
+        if filterType == "email":
+            for item  in response:
+                if item["sender_email"] == filterKey or item["receiver_email"] == filterKey:
+                    filterList.append(item)
+
+        elif filterType == "curency":
+            for item  in response:
+                if item["currency"] == filterKey:
+                    filterList.append(item)
+        elif filterType == "transactionType":
+            for item  in response:
+                if item["type"] == filterKey:
+                    filterList.append(item)
+
+    return render_template("userTransactions.html",transactions=filterList)
+
 
 @app.route('/profile/wallet', methods=["GET"])
 def wallet():
@@ -189,8 +245,13 @@ def wallet():
     #     "email": user["user"]["email"]
     # }
     response = requests.get("http://127.0.0.1:5000/user-cryptocurrencies", params=parameters)
-    response.raise_for_status()
-    data = response.json()
+    try:
+        response.raise_for_status()
+        data = response.json()
+    except Exception as e:
+        data2 = response.json()
+        print(data2)
+        return render_template("transactionMessage.html", message=data2["error"]["Error"])
 
     # Need to implement calculation of total amount in $ held in each asset and show on UI
 
@@ -231,8 +292,13 @@ def withdraw():
     }
 
     response = requests.patch("http://127.0.0.1:5000/transaction", params=parameters)
-    response.raise_for_status()
-    data = response.json()
+    try:
+        response.raise_for_status()
+        data = response.json()
+    except Exception as e:
+        data2 = response.json()
+        print(data2)
+        return render_template("transactionMessage.html", message=data2["error"]["Error"])
 
     if response.status_code == 200:
         return render_template("transactionMessage.html", message=data["response"]["Success"])
@@ -251,34 +317,33 @@ def buy_transaction():
 
     currency = str(request.form["currency"])
     price = float(request.form["price"])
-    amount = float(request.form["amount"])
+    from_amount = float(request.form["fromamount"])
+    to_amount = float(request.form["toamount"])
     email = user["user"]["email"]
 
     parameters = {
         "email": email,
         "curr": currency,
         "price": price,
-        "amount": amount,
+        "from_amount": from_amount,
+        "to_amount": to_amount
 
     }
     message="Successfully bought cryptocurrency"
     data=""
+
+    response = requests.post("http://127.0.0.1:5000/buy-crypto", params=parameters)
     try:
-        response = requests.post("http://127.0.0.1:5000/buy-crypto", params=parameters)
         response.raise_for_status()
         data = response.json()
-    except:
-        if response.status_code == 200:
-            return render_template("transactionMessage.html",message=data)
-            print(data)
-        elif response.status_code == 400:
-            #print("User already exists")
-            message="Insufficient funds. User does not have enough funds to make this purchase!"
-        elif response.status_code == 500:
-            #print("User not created due to server error")
-            message="Server error"
+        return render_template("transactionMessage.html", message=message)
+    except Exception as e:
+        data2 = response.json()
+        print(data2)
+        return render_template("transactionMessage.html", message=data2["error"]["Error"])
 
-    return render_template("transactionMessage.html",message=message)
+
+
 
 
 @app.route('/sell-form', methods=["GET", "POST"])
@@ -306,22 +371,19 @@ def sell_crypto():
 
     message = "Successfully sold cryptocurrency"
     data = ""
+
+    response = requests.patch("http://127.0.0.1:5000/sell-crypto", params=parameters)
     try:
-        response = requests.patch("http://127.0.0.1:5000/sell-crypto", params=parameters)
         response.raise_for_status()
         data = response.json()
-    except:
-        if response.status_code == 200:
-            return render_template("transactionMessage.html", message=data)
-            print(data)
-        elif response.status_code == 400:
-            # print("User already exists")
-            message = "Insufficient funds. User does not have enough crypto to sell!"
-        elif response.status_code == 500:
-            # print("User not created due to server error")
-            message = "Server error"
+        return render_template("transactionMessage.html", message=message)
+    except Exception as e:
+        data2 = response.json()
+        print(data2)
+        return render_template("transactionMessage.html", message=data2["error"]["Error"])
 
-    return render_template("transactionMessage.html", message=message)
+
+
 
 
 @app.route('/exchange-form', methods=["GET", "POST"])
@@ -363,8 +425,13 @@ def exchange():
         }
 
         response = requests.patch("http://127.0.0.1:5000/exchange-crypto", params=parameters)
-        response.raise_for_status()
-        data = response.json()
+        try:
+            response.raise_for_status()
+            data = response.json()
+        except Exception as e:
+            data2 = response.json()
+            print(data2)
+            return render_template("transactionMessage.html", message=data2["error"]["Error"])
 
         if response.status_code == 200:
             return render_template("transactionMessage.html", message=data["response"]["Success"])
@@ -396,15 +463,20 @@ def edit():
         }
 
         response = requests.patch("http://127.0.0.1:5000/update-user-by-email", params=parameters)
-        response.raise_for_status()
-        data = response.json()
+        try:
+            response.raise_for_status()
+            data = response.json()
+        except Exception as e:
+            data2 = response.json()
+            print(data2)
+            return render_template("transactionMessage.html", message=data2["error"]["Error"])
+
         if response.status_code == 200:
             session["user"] = data
             user = session["user"]
             print(data)
 
-        elif response.status_code == 500:
-            print("User not updated due to server error")
+
 
         return render_template("profil.html", user=user)
     else:
@@ -434,16 +506,18 @@ def register():
         }
 
         response = requests.post("http://127.0.0.1:5000/register-user", params=parameters)
-        response.raise_for_status()
-        data = response.json()
+        try:
+            response.raise_for_status()
+            data = response.json()
+        except Exception as e:
+            data2 = response.json()
+            print(data2)
+            return render_template("transactionMessage.html", message=data2["error"]["Error"])
+
         if response.status_code == 200:
             session["user"] = data
             print(data)
-        elif response.status_code == 400:
-            print("User already exists")
-        elif response.status_code == 500:
-            print("User not created due to server error")
-        
+
         return render_template("register.html")
     else:    
         return render_template("register.html")
@@ -467,8 +541,9 @@ def login():
             "email": email,
             "pass": password
         }
+
+        response = requests.get("http://127.0.0.1:5000/login-user", params=parameters)
         try:
-            response = requests.get("http://127.0.0.1:5000/login-user", params=parameters)
             response.raise_for_status()
             data = response.json()
 
@@ -479,13 +554,10 @@ def login():
             if response.status_code == 200:
                 session["user"] = data
             return redirect("/")
-        except:
-            #elif response.status_code == 401:
-             #   print("Wrong Credentials")
-            #elif response.status_code == 404:
-            message="User not found"
-            return  render_template("transactionMessage.html",message=message)
-
+        except Exception as e:
+            data2 = response.json()
+            print(data2)
+            return render_template("transactionMessage.html", message=data2["error"]["Error"])
 
         return render_template("login.html")
     else:    
