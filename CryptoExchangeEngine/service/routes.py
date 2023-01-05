@@ -15,6 +15,7 @@ def get_user_by_email():
     usr_email = request.args.get("email")
     found_user = db.session.query(User).filter_by(email=usr_email).first()
     if found_user:
+        print(jsonify(found_user.to_dict()))
         return jsonify(user=found_user.to_dict()), 200
     else:
         return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
@@ -22,16 +23,24 @@ def get_user_by_email():
 
 @app.route("/user-transactions", methods=["GET"])
 def user_transactions():
-    transactions_list = []
     usr_email = request.args.get("email")
     sender_transactions = db.session.query(Transaction).filter_by(sender_email=usr_email).all()
     receiver_transactions = db.session.query(Transaction).filter_by(receiver_email=usr_email).all()
-    for trx in sender_transactions:
-        temp = trx.to_dict()
-        transactions_list.append(temp)
-    for trx in receiver_transactions:
-        temp = trx.to_dict()
-        transactions_list.append(temp)
+
+    sender_list = [tr.to_dict() for tr in sender_transactions]
+    receiver_list = [tr.to_dict() for tr in receiver_transactions]
+
+    transactions_list = []
+
+    for item in sender_list:
+        if item not in transactions_list:
+            transactions_list.append(item)
+
+    for item in receiver_list:
+        if item not in transactions_list:
+            transactions_list.append(item)
+
+    transactions_list.sort(key=lambda x: x['id'])
     return jsonify(transactions_list), 200
 
 
@@ -306,7 +315,16 @@ def deposit():
             else:
                 if validate_card(c_number, c_date, c_cvv):
                     user_balance = db.session.query(Currency).filter_by(email=user.email, currency="USD").first()
-                    user_balance += amount
+                    if not user_balance:
+                        new_currency = Currency(
+                            email=user.email,
+                            currency="USD",
+                            amount=amount
+                        )
+                        db.session.add(new_currency)
+                    else:
+                        user_balance += amount
+
                     new_transaction = Transaction(
                         type="DEPOSIT",
                         state="PROCESSED",
@@ -336,7 +354,7 @@ def transaction():
 
     user_sender = db.session.query(User).filter_by(email=sender).first()
     user_receiver = db.session.query(User).filter_by(email=receiver).first()
-    if not user_sender and not user_receiver:
+    if not user_sender or not user_receiver:
         return jsonify(error={"Error": "Invalid request, user(s) does not exist!"}), 400
     if user_sender.verified and user_receiver.verified:
         if sender == receiver:
@@ -363,13 +381,23 @@ def transaction():
                         "Error": f"Cryptocurrency not owned. User does not own cryptocurrency {crypto_currency}!"}), 400
         else:
             sender_balance = db.session.query(Currency).filter_by(email=user_sender.email, currency="USD").first()
-            receiver_balance = db.session.query(Currency).filter_by(email=user_receiver.email, currency="USD").first()
-            new_balance = float(sender_balance) - float(amount)
+            new_balance = float(sender_balance.amount) - float(amount)
             if new_balance < 0:
                 return jsonify(error={
                     "Error": f"Sender has insufficient balance to perform requested transaction. Requested: {amount}  Available: {user_sender.balance}"}), 400
             else:
-                sender_balance = new_balance
+                receiver_balance = db.session.query(Currency).filter_by(email=user_receiver.email,
+                                                                        currency="USD").first()
+                if not receiver_balance:
+                    new_currency = Currency(
+                        email=user_receiver.email,
+                        currency="USD",
+                        amount=float(amount)
+                    )
+                    db.session.add(new_currency)
+                else:
+                    receiver_balance.amount += float(amount)
+                sender_balance.amount = new_balance
                 new_transaction = Transaction(
                     type="WITHDRAW",
                     state="PROCESSED",
@@ -378,11 +406,9 @@ def transaction():
                     to_amount=amount,
                     to_currency="USD",
                     sender_email=user_sender.email,
-                    receiver_email=user_receiver.email,
-                    amount=amount
+                    receiver_email=user_receiver.email
                 )
                 db.session.add(new_transaction)
-                receiver_balance += float(amount)
                 db.session.commit()
                 return jsonify(
                     response={"Success": f"Transaction has been successfully processed"}), 200
