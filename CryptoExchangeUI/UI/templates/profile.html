@@ -1,10 +1,10 @@
-{% extends "base.html" %} {% block title %}Profil Page{% endblock %} {% block content %}
+{% extends "base.html" %} {% block title %}Profile Page{% endblock %} {% block content %}
 
 
 <table border="1">
      <tr colspan=2>
 
-      PROFIL
+         <h1>PROFILE</h1>
       </tr>
     {% for key,value in user.items() %}
     {% for key2,value2 in value.items() %}
@@ -24,21 +24,21 @@
     </tr>
     {% if  user["user"]["verified"] == True %}
     <tr>
-        <td>Add balance </td>
+        <td>Deposit Fiat</td>
         <td>
-              <a href="/profile/deposit">ADD</a>
+              <a href="/profile/deposit">Deposit</a>
         </td>
     </tr>
     {% else %}
     <tr>
-        <td>Add credit card </td>
+        <td>Verify Profile </td>
         <td>
-              <a href="/credit-card">ADD</a>
+              <a href="/credit-card">Verify</a>
         </td>
     </tr>
     {% endif %}
     <tr>
-        <td>Past transactions</td>
+        <td>Transaction History</td>
         <td>
               <a href="/user-transactions">View</a>
         </td>

@@ -40,10 +40,47 @@ CEX - User transactions  Page
 <br>
 <button><a href="/user-transactions">Reset</a></button>
 <table border="1">
+    <tr>
+        <th class="text-center">
+            ID
+        </th>
+        <th>
+            HASH ID
+        </th>
+        <th class="text-center">
+            TIME
+        </th>
+        <th class="text-center">
+            TRANSACTION TYPE
+        </th>
+        <th class="text-center">
+            SENT
+        </th>
+        <th class="text-center">
+            CURRENCY
+        </th>
+        <th class="text-center">
+            RECEIVED
+        </th>
+        <th class="text-center">
+            CURRENCY
+        </th>
+        <th class="text-center">
+            STATE
+        </th>
+        <th class="text-center">
+            SENDER
+        </th>
+        <th class="text-center">
+            RECEIVER
+        </th>
+    </tr>
+
+
 {% for var in transactions %}
     <tr>
 {% for  key,value in var.items() %}
-        <td>{{value}}</td>
+        <td class="text-center">{{value}}</td>
 
 {% endfor %}
     </tr>
