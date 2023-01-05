@@ -14,7 +14,7 @@ class User(db.Model):
     verified = db.Column(db.Boolean, nullable=False, default=False)
 
     transactions = db.relationship('Transaction', backref='user', lazy=True)
-    crypto_currencies = db.relationship('CryptoCurrency', backref='user', lazy=True)
+    currencies = db.relationship('Currency', backref='user', lazy=True)
 
     def __repr__(self):
         return f"User('{self.email}', '{self.name}', '{self.surname}',)"
@@ -23,7 +23,7 @@ class User(db.Model):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
-class CryptoCurrency(db.Model):
+class Currency(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), db.ForeignKey('user.id'), nullable=False)
     currency = db.Column(db.String(30), nullable=False)

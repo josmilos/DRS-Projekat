@@ -2,7 +2,7 @@ import random
 import time
 import multiprocessing as mp
 from CryptoExchangeEngine.service import db
-from CryptoExchangeEngine.service.models import Transaction, CryptoCurrency
+from CryptoExchangeEngine.service.models import Transaction, Currency
 from Crypto.Hash import keccak
 from CryptoExchangeEngine.service.creditCard import CARD_NUMBER, CARD_DATE, CARD_CVV
 
@@ -51,11 +51,11 @@ def process_transaction(hashed_id, sender, receiver, from_amount, to_amount, fro
     db.session.commit()
     # After 5 minutes these actions below will be taken
     time.sleep(3)
-    receiver_balance = db.session.query(CryptoCurrency).filter_by(email=receiver, currency=to_currency).first()
+    receiver_balance = db.session.query(Currency).filter_by(email=receiver, currency=to_currency).first()
     if receiver_balance:
         receiver_balance.amount += to_amount
     else:
-        new_currency = CryptoCurrency(
+        new_currency = Currency(
             email=receiver,
             currency=to_currency,
             amount=to_amount
