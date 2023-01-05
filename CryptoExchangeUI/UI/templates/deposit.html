@@ -2,55 +2,55 @@
 
 
 <form method="POST" action="/profile/deposit">
-    <table border="1">
+    <table border="0">
         <tr>
-            <td>Full name</td>
+            <td>Full Name</td>
             <td>
                   <input
                   type="text"
                   class="form-control"
                   id="cowner"
                   name="cowner"
-                  placeholder="Enter full name"
+                  placeholder="Enter Full Name"
                   required
                   />
             </td>
         </tr>
         <tr>
-            <td>Card number</td>
+            <td>Card Number</td>
             <td>
                   <input
                   type="text"
                   class="form-control"
                   id="cnum"
                   name="cnum"
-                  placeholder="Enter card number"
+                  placeholder="Enter Card Number"
                   required
                   />
             </td>
         </tr>
         <tr>
-            <td>Expire date</td>
+            <td>Expire Date</td>
             <td>
                   <input
                   type="text"
                   class="form-control"
                   id="cdate"
                   name="cdate"
-                  placeholder="Enter expire date"
+                  placeholder="MM/YY"
                   required
                   />
             </td>
         </tr>
         <tr>
-            <td>Security code</td>
+            <td>CVV</td>
             <td>
                   <input
                   type="text"
                   class="form-control"
                   id="ccvv"
                   name="ccvv"
-                  placeholder="Enter adress"
+                  placeholder="CVV"
                   required
                   />
             </td>
@@ -63,17 +63,17 @@
                   class="form-control"
                   id="amount"
                   name="amount"
-                  placeholder="Enter amount"
+                  placeholder="Enter Amount"
                   step="any"
                   required
                   />
             </td>
         </tr>
-
-          <tr colspan=2>
-
-          <button type="submit" class="btn btn-primary">Add balance</button>
-          </tr>
+        <tr>
+            <td colspan="2" align="right">
+                <button type="submit" class="btn btn-primary">Deposit</button>
+            </td>
+        </tr>
     </table>
 </form>
 

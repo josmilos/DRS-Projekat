@@ -5,10 +5,10 @@ CEX - MY WALLET
 {% block content %}
 
 <br>
-<table border="1" style="width: 25%" >
+<table border="0" style="width: 37%" >
     <tr>
-        <td>Currency</td>
-        <td>Balance</td>
+        <th class="text-center">Currency</th>
+        <th class="text-center">Balance</th>
     </tr>
 {% for key,value in crypto.items() %}
 
@@ -21,7 +21,7 @@ CEX - MY WALLET
                   id="currency"
                   name="currency"
 
-                  value="{{ key }}"
+                  value={{ key }}
                   readonly
                   />
             </td>
