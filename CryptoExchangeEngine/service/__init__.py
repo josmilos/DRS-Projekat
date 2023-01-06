@@ -10,4 +10,12 @@ db = SQLAlchemy(app)
 
 from CryptoExchangeEngine.service import routes
 
+# tasks = Queue()
+# results = Queue()
+#
+# while True:
+#     if not tasks.empty():
+#         p = Process(target=hash_function, args=[tasks.get(), results])
+#         p.start()
+#     time.sleep(0.5)
 
