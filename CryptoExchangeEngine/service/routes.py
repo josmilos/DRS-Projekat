@@ -1,7 +1,9 @@
-from flask import request, jsonify, render_template
+import threading
+from multiprocessing import Lock
+from flask import request, jsonify, render_template, current_app
 from CryptoExchangeEngine.service import app, db
 from CryptoExchangeEngine.service.models import User, Transaction, Currency
-from CryptoExchangeEngine.service.functions import validate_card, hash_function, initiate_transaction
+from CryptoExchangeEngine.service.functions import validate_card, initiate_transaction
 
 
 @app.route("/")
@@ -15,7 +17,6 @@ def get_user_by_email():
     usr_email = request.args.get("email")
     found_user = db.session.query(User).filter_by(email=usr_email).first()
     if found_user:
-        print(jsonify(found_user.to_dict()))
         return jsonify(user=found_user.to_dict()), 200
     else:
         return jsonify(error={"Not Found": f"Sorry, user with email {usr_email} was not found in the database"}), 404
@@ -128,18 +129,21 @@ def buy_crypto():
     user_balance = db.session.query(Currency).filter_by(email=user.email, currency="USD").first()
     if user:
         if user.verified:
-            if from_amount > user_balance:
+            if from_amount > user_balance.amount:
                 return jsonify(
                     error={"Error": "Insufficient funds. User does not have enough funds to make this purchase!"}), 400
             else:
-                user_balance -= from_amount
-                initiate_transaction(sender=usr_email, receiver=usr_email, from_amount=from_amount,
-                                     to_amount=to_amount, from_currency="USD",
-                                     to_currency=to_currency, tr_type="BUY",
-                                     state="PROCESSING")
-            db.session.commit()
+                lock = Lock()
+                t = threading.Thread(target=initiate_transaction, args=[current_app._get_current_object(), lock,
+                                                                        user.email, user.email,
+                                                                        from_amount, to_amount,
+                                                                        "USD",
+                                                                        to_currency,
+                                                                        "BUY"])
+                t.start()
             return jsonify(response={
-                "Success": f"Successfully bought cryptocurrency {to_amount}{to_currency} for {from_amount}USD"}), 200
+                "Success": f"Successfully initiated transaction to buy {to_amount} {to_currency}"
+                                   f" for {from_amount}USD"}), 200
         else:
             return jsonify(
                 error={
@@ -164,17 +168,19 @@ def sell_crypto():
             user_balance = db.session.query(Currency).filter_by(email=user.email, currency="USD").first()
             if user_crypto_balance:
                 if user_crypto_balance.amount >= from_amount:
-                    user_balance += to_amount
 
-                    initiate_transaction(sender=usr_email, receiver=usr_email, from_amount=from_amount,
-                                         to_amount=to_amount, from_currency=from_currency,
-                                         to_currency="USD", tr_type="SELL",
-                                         state="PROCESSING")
-
-                    db.session.commit()
+                    lock = Lock()
+                    t = threading.Thread(target=initiate_transaction, args=[current_app._get_current_object(), lock,
+                                                                            user.email, user.email,
+                                                                            from_amount, to_amount,
+                                                                            from_currency,
+                                                                            "USD",
+                                                                            "SELL"])
+                    t.start()
                     # doraditi ovaj response
                     return jsonify(response={
-                        "Success": f"Successfully sold cryptocurrency {from_currency}, amount {from_amount} for {to_amount}USD"}), 200
+                        "Success": f"Successfully initiated transaction to sell {from_amount} {from_currency}"
+                                   f" for {to_amount}USD"}), 200
                 else:
                     return jsonify(error={
                         "Error": "Insufficient funds. User does not have enough crypto to sell!"}), 400
@@ -214,16 +220,24 @@ def exchange_crypto():
                     return jsonify(error={
                         "Error": f"Insufficient funds. User does not have enough crypto {selling_crypto_currency}!"}), 400
                 else:
-                    selling_currency_balance.amount -= selling_crypto_amount
-                    db.session.commit()
-                    initiate_transaction(sender=usr_email, receiver=usr_email, from_amount=selling_crypto_amount,
-                                         to_amount=buying_crypto_amount, from_currency=selling_crypto_currency,
-                                         to_currency=buying_crypto_currency, tr_type="EXCHANGE",
-                                         state="PROCESSING")
+                    # selling_currency_balance.amount -= selling_crypto_amount
+                    # db.session.commit()
+                    # initiate_transaction(sender=usr_email, receiver=usr_email, from_amount=selling_crypto_amount,
+                    #                      to_amount=buying_crypto_amount, from_currency=selling_crypto_currency,
+                    #                      to_currency=buying_crypto_currency, tr_type="EXCHANGE",
+                    #                      state="PROCESSING")
+                    lock = Lock()
+                    t = threading.Thread(target=initiate_transaction, args=[current_app._get_current_object(), lock,
+                                                                            user.email, user.email,
+                                                                            selling_crypto_amount, buying_crypto_amount,
+                                                                            selling_crypto_currency, buying_crypto_currency,
+                                                                            "EXCHANGE"])
+                    t.start()
                     # Potrebno doraditi ovaj response
                     return jsonify(response={
-                        "Success": f"Successfully traded cryptocurrency {selling_crypto_currency},"
-                                   f" amount {selling_crypto_amount} for cryptocurrency {buying_crypto_currency}"}), 200
+                        "Success": f"Successfully initiated transaction to exchange "
+                                   f"{selling_crypto_amount} {selling_crypto_currency},"
+                                   f" for {buying_crypto_amount} {buying_crypto_currency}"}), 200
         else:
             return jsonify(
                 error={"Error": f"This user is not verified. Crypto trades can not be made before verification!"}), \
@@ -367,13 +381,12 @@ def transaction():
                     return jsonify(error={
                         "Error": f"Sender has insufficient balance to perform requested transaction. Requested: {amount}  Available: {sender_balance.amount}"}), 400
                 else:
-                    # hashed_id = hash_function({"sender": sender, "receiver": receiver, "amount": amount})
-                    sender_balance.amount = new_balance
-                    db.session.commit()
-                    initiate_transaction(sender=sender, receiver=receiver, from_amount=amount,
-                                         to_amount=amount, from_currency=crypto_currency,
-                                         to_currency=crypto_currency, tr_type="WITHDRAW",
-                                         state="PROCESSING")
+                    lock = Lock()
+                    t = threading.Thread(target=initiate_transaction, args=[current_app._get_current_object(), lock,
+                                                                            sender, receiver, amount, amount,
+                                                                            crypto_currency, crypto_currency,
+                                                                            "WITHDRAW"])
+                    t.start()
                     return jsonify(response={"Success": f"Transaction has been successfully initiated"}), 200
             else:
                 return jsonify(

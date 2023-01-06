@@ -214,7 +214,6 @@ def user_transactions():
         }
         response = requests.get("http://127.0.0.1:5000/user-transactions", params=parameters).json()
 
-    print(response)
     return render_template("userTransactions.html",transactions=response)
 
 
@@ -352,7 +351,7 @@ def buy_transaction():
     try:
         response.raise_for_status()
         data = response.json()
-        return render_template("transactionMessage.html", message=message)
+        return render_template("transactionMessage.html", message=data["response"]["Success"])
     except Exception as e:
         data2 = response.json()
         print(data2)
@@ -396,7 +395,7 @@ def sell_crypto():
     try:
         response.raise_for_status()
         data = response.json()
-        return render_template("transactionMessage.html", message=message)
+        return render_template("transactionMessage.html", message=data["response"]["Success"])
     except Exception as e:
         data2 = response.json()
         print(data2)
