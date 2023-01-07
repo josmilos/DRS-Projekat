@@ -4,6 +4,7 @@ CEX - User transactions  Page
 {% endblock %}
 {% block content %}
 
+<h1>Transaction History</h1>
 <br>
 <form method="post" action="/user-transactions-filter">
     <table >
@@ -34,11 +35,14 @@ CEX - User transactions  Page
             <td>
                 <button type="submit" class="btn btn-primary">Filter</button>
             </td>
+            <td>
+                <a href="/user-transactions" class="btn btn-primary">Reset</a>
+            </td>
         </tr>
     </table>
 </form>
 <br>
-<button><a href="/user-transactions">Reset</a></button>
+
 <table border="1">
     <tr>
         <th class="text-center">

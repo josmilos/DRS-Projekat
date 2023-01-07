@@ -1,5 +1,8 @@
 from CryptoExchangeEngine.service import db
 from datetime import datetime
+import pytz
+
+tz = pytz.timezone('Europe/Belgrade')
 
 
 class User(db.Model):
@@ -39,7 +42,7 @@ class Currency(db.Model):
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hash_id = db.Column(db.String(500), nullable=True)
-    time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    time = db.Column(db.DateTime, nullable=False, default=datetime.now(tz))
     type = db.Column(db.String(10), nullable=False) # type =  DEPOSIT || WITHDRAW || VERIFY || BUY || SELL || EXCHANGE
     from_amount = db.Column(db.Float, nullable=False)
     from_currency = db.Column(db.String(30), nullable=False)
