@@ -1,14 +1,14 @@
 {% extends "base.html" %} {% block title %}Exchange Crypto{% endblock %} {% block content %}
 
 
-<form method="POST" action="/exchange">
+<form method="POST" action="/exchange-confirm">
     <table border="1">
         <tr>
-        <td colspan="2" align="center">Exchange From</td>
-        <td colspan="2" align="center">Exchange To</td>
+        <th colspan="2" class="text-center">Exchange From</th>
+        <th colspan="2" class="text-center">Exchange To</th>
         </tr>
         <tr>
-            <td colspan="2" align="center">{{ sellingCurrency }}</td>
+            <td colspan="2" class="text-center">{{ sellingCurrency }}</td>
             <input type="hidden" id="scurr" name="scurr" value="{{ sellingCurrency }}">
             <td align="center">
                 <select id="bcurr" name="bcurr">
@@ -19,8 +19,8 @@
             </td>
         </tr>
         <tr>
-            <td>Amount</td>
-            <td><input type="number"
+
+            <td colspan="2"><input type="number"
                    id="samount"
                    class="form-control"
                    name="samount"
@@ -30,7 +30,7 @@
                        required
             />
             </td>
-            <td><button type="submit" class="btn btn-primary">EXCHANGE</button></td>
+            <td><button type="submit" class="btn btn-primary">CALCULATE</button></td>
         </tr>
 
     </table>

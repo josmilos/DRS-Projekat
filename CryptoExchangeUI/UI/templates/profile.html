@@ -4,7 +4,7 @@
 <table border="1">
      <tr colspan=2>
 
-         <h1>PROFILE</h1>
+         <h1>Profile</h1>
       </tr>
     {% for key,value in user.items() %}
     {% for key2,value2 in value.items() %}
@@ -17,32 +17,9 @@
     {% endfor %}
     {% endfor %}
     <tr>
-        <td>Edit profile</td>
-        <td>
-              <a href="/edit">EDIT</a>
-        </td>
+        <td colspan="2"><a href="/edit" class="btn btn-primary" style="width:100%">Edit profile</a></td>
     </tr>
-    {% if  user["user"]["verified"] == True %}
-    <tr>
-        <td>Deposit Fiat</td>
-        <td>
-              <a href="/profile/deposit">Deposit</a>
-        </td>
-    </tr>
-    {% else %}
-    <tr>
-        <td>Verify Profile </td>
-        <td>
-              <a href="/credit-card">Verify</a>
-        </td>
-    </tr>
-    {% endif %}
-    <tr>
-        <td>Transaction History</td>
-        <td>
-              <a href="/user-transactions">View</a>
-        </td>
-    </tr>
+
 
 </table>
 

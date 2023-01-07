@@ -41,6 +41,14 @@ def user_transactions():
         if item not in transactions_list:
             transactions_list.append(item)
 
+    for item in transactions_list:
+        item["time"] = item["time"].strftime("%d/%m/%Y %H:%M:%S")
+        if item["sender_email"] != item["receiver_email"]:
+            if item["receiver_email"] == usr_email:
+                item["type"] = "RECEIVED"
+        if item["hash_id"] is None:
+            item["hash_id"] = ""
+
     transactions_list.sort(key=lambda x: x['id'])
     return jsonify(transactions_list), 200
 
@@ -103,7 +111,6 @@ def add_new_user():
         surname=request.args.get('surname'),
         address=request.args.get('addr'),
         phone=request.args.get('ph'),
-        #balance=float(0),
         verified=False
     )
     try:
@@ -121,7 +128,6 @@ def add_new_user():
 def buy_crypto():
     usr_email = str(request.args.get("email"))
     to_currency = str(request.args.get('curr')).upper()
-    # crypto_price = float(request.args.get('price'))
     from_amount = float(request.args.get('from_amount'))
     to_amount = float(request.args.get('to_amount'))
 
@@ -156,7 +162,6 @@ def buy_crypto():
 def sell_crypto():
     usr_email = str(request.args.get("email"))
     from_currency = str(request.args.get('curr')).upper()
-    #crypto_price = float(request.args.get('price'))
     from_amount = float(request.args.get('from_amount'))
     to_amount = float(request.args.get('to_amount'))
 
@@ -220,12 +225,6 @@ def exchange_crypto():
                     return jsonify(error={
                         "Error": f"Insufficient funds. User does not have enough crypto {selling_crypto_currency}!"}), 400
                 else:
-                    # selling_currency_balance.amount -= selling_crypto_amount
-                    # db.session.commit()
-                    # initiate_transaction(sender=usr_email, receiver=usr_email, from_amount=selling_crypto_amount,
-                    #                      to_amount=buying_crypto_amount, from_currency=selling_crypto_currency,
-                    #                      to_currency=buying_crypto_currency, tr_type="EXCHANGE",
-                    #                      state="PROCESSING")
                     lock = Lock()
                     t = threading.Thread(target=initiate_transaction, args=[current_app._get_current_object(), lock,
                                                                             user.email, user.email,
@@ -301,6 +300,7 @@ def verify_user():
                     from_amount=1,
                     from_currency="USD",
                     sender_email=user.email,
+                    receiver_email=user.email
                 )
 
                 db.session.add(new_transaction)
@@ -337,7 +337,7 @@ def deposit():
                         )
                         db.session.add(new_currency)
                     else:
-                        user_balance += amount
+                        user_balance.amount += amount
 
                     new_transaction = Transaction(
                         type="DEPOSIT",
@@ -448,5 +448,3 @@ def delete_user_by_email():
             return jsonify(response={"Success": f"Successfully deleted user with email {usr_email}"}), 200
     else:
         return jsonify(error={"Not Found": "Sorry, user with that email address was not found in the database"}), 404
-
-# Testing purposes

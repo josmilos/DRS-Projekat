@@ -57,30 +57,64 @@
 <body>
     <!--<h1>Welcome to the CEX Crypto Exchange</h1>-->
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbar"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbar">
-          <div class="navbar-nav">
-            
-            <a class="nav-item nav-link" id="home" href="/">Home</a>
-            
-            
-            {%if "user" in session %}
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <a class="navbar-brand" id="home" href="/">Home</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+                {%if "user" in session %}
+          <div class="collapse navbar-collapse" id="navbarNav1">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  My Account
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" id="profile" href="/profile">Profile</a>
+                  <a class="dropdown-item" id="wallet" href="/profile/wallet">Wallet</a>
+                    {% if  session["user"]["user"]["verified"] == True %}
+                    <a class="dropdown-item" id="deposit" href="/profile/deposit">Deposit</a>
+                    {% else %}
+                    <a class="dropdown-item" id="verify" href="/credit-card">Verify</a>
+                    {% endif %}
+                    <a class="dropdown-item" id="transactions" href="/user-transactions">Transactions</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" id="logout" href="/logout">Log Out</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+                {%else%}
+                <div class="collapse navbar-collapse" id="navbarNav2">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link " id="register" href="/register" role="button" aria-haspopup="true" aria-expanded="false">
+                  Register
+                </a>
+                        </li>
+                        <li>
+                            <a class="nav-link " id="login" href="/login" role="button" aria-haspopup="true" aria-expanded="false">
+                  Log In
+                </a>
+                        </li>
+                    </ul>
+                </div>
+                {%endif%}
 
-            <a class="nav-item nav-link" id="ptofil" href="/profile">Profile</a>
-              <a class="nav-item nav-link" id="wallet" href="/profile/wallet">Wallet</a>
-            <a class="nav-item nav-link" id="logout" href="/logout">Logout</a>
-            {%else%}
-            <a class="nav-item nav-link" id="login" href="/login">Login</a>
-            <a class="nav-item nav-link" id="register" href="/register">Register</a>
-            {%endif%}
+
+
+
+        </nav>
+
+
+
+
+
+
+
+
+
+
 
           </div>
         </div>
