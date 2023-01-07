@@ -1,0 +1,44 @@
+{% extends "base.html" %} {% block title %}Exchange Crypto{% endblock %} {% block content %}
+
+
+<form method="POST" action="/exchange">
+    <table border="1">
+        <tr>
+        <th colspan="2" class="text-center">Exchange From</th>
+        <th colspan="2" class="text-center">Exchange To</th>
+        </tr>
+        <tr>
+            <td colspan="2" class="text-center">{{ sellingCurrency }}</td>
+            <input type="hidden" id="scurr" name="scurr" value="{{ sellingCurrency }}">
+            <td class="text-center"> {{ buyingCurrency }}</td>
+            <input type="hidden" id="bcurr" name="bcurr" value="{{ buyingCurrency }}">
+        </tr>
+        <tr>
+
+            <td colspan="2"><input type="number"
+                   id="samount"
+                   class="form-control"
+                   name="samount"
+                   value="{{ sellingBalance }}"
+                   step="any"
+                   readonly
+            />
+            </td>
+            <td colspan="2"><input type="number"
+                   id="bamount"
+                   class="form-control"
+                   name="bamount"
+                   value="{{ buyingBalance }}"
+                   step="any"
+                   readonly
+            >
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4"><button type="submit" class="btn btn-primary" style="width:100%">EXCHANGE</button></td>
+        </tr>
+    </table>
+</form>
+
+
+{% endblock %}
