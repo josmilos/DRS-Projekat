@@ -4,18 +4,26 @@ CEX - Home Page
 {% endblock %}
 {% block content %}
 
+<style>
+    table{
+        margin-left: auto;
+        margin-right: auto;
+
+    }
+</style>
 <br>
-<table border="0" style="width: 25%" >
+<table class="center" border="0" style="width: 25%" >
     <tr>
         <th class="text-center">Currency</th>
         <th class="text-center">Value in USD</td>
     </tr>
 {% for key,value in crypto.items() %}
 
-<form method="post" action="/market">
-         <tr >
+<form  method="post" action="/market">
+         <tr  >
             <td style="text-align: center">
                 <input
+                  style="background-color: crimson;color: white; font-weight: bold"
                   type="text"
                   class="form-control"
                   id="currency"
@@ -27,6 +35,7 @@ CEX - Home Page
             </td>
             <td style="text-align: center">
                   <input
+                  style="background-color: crimson; color: black; font-weight: bold"
                   type="text"
                   class="form-control"
                   id="price"
