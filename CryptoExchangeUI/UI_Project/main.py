@@ -64,15 +64,15 @@ def crypto_price(crypto):
 
 @app.route('/')
 def home():
-    #temp = [] + SUPPORTED_ASSETS
-    #temp.pop(0)
-    #cryptocurrency_prices = crypto_prices(temp)
-    cryptocurrency_prices = {
-          "BTC": 17000,
-          "ETH": 1180,
-          "LTC": 65
-    }
-    print(cryptocurrency_prices)
+    temp = [] + SUPPORTED_ASSETS
+    temp.pop(0)
+    cryptocurrency_prices = crypto_prices(temp)
+    #cryptocurrency_prices = {
+    #      "BTC": 17000,
+    #      "ETH": 1180,
+    #      "LTC": 65
+    #}
+    #print(cryptocurrency_prices)
     return render_template("index.html", crypto=cryptocurrency_prices)
 
 
