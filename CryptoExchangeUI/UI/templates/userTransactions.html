@@ -4,6 +4,7 @@ CEX - User transactions  Page
 {% endblock %}
 {% block content %}
 
+<h1>Transaction History</h1>
 <br>
 <form method="post" action="/user-transactions-filter">
     <table >
@@ -34,16 +35,56 @@ CEX - User transactions  Page
             <td>
                 <button type="submit" class="btn btn-primary">Filter</button>
             </td>
+            <td>
+                <a href="/user-transactions" class="btn btn-primary">Reset</a>
+            </td>
         </tr>
     </table>
 </form>
 <br>
-<button><a href="/user-transactions">Reset</a></button>
+
 <table border="1">
+    <tr>
+        <th class="text-center">
+            ID
+        </th>
+        <th class="text-center">
+            HASH ID
+        </th>
+        <th class="text-center">
+            TIME
+        </th>
+        <th class="text-center">
+            TRANSACTION TYPE
+        </th>
+        <th class="text-center">
+            SENT
+        </th>
+        <th class="text-center">
+            CURRENCY
+        </th>
+        <th class="text-center">
+            RECEIVED
+        </th>
+        <th class="text-center">
+            CURRENCY
+        </th>
+        <th class="text-center">
+            STATE
+        </th>
+        <th class="text-center">
+            SENDER
+        </th>
+        <th class="text-center">
+            RECEIVER
+        </th>
+    </tr>
+
+
 {% for var in transactions %}
     <tr>
 {% for  key,value in var.items() %}
-        <td>{{value}}</td>
+        <td class="text-center">{{value}}</td>
 
 {% endfor %}
     </tr>

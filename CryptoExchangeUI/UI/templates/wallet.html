@@ -4,11 +4,12 @@ CEX - MY WALLET
 {% endblock %}
 {% block content %}
 
+<h1>My Wallet</h1>
 <br>
-<table border="1" style="width: 25%" >
+<table border="0" style="width: 37%" >
     <tr>
-        <td>Currency</td>
-        <td>Balance</td>
+        <th class="text-center">Currency</th>
+        <th class="text-center">Balance</th>
     </tr>
 {% for key,value in crypto.items() %}
 
@@ -21,7 +22,7 @@ CEX - MY WALLET
                   id="currency"
                   name="currency"
 
-                  value="{{ key }}"
+                  value={{ key }}
                   readonly
                   />
             </td>
@@ -37,13 +38,8 @@ CEX - MY WALLET
                   readonly
                   />
             </td>
-             <td>
-
-             </td>
 
              {% if "user" in session%}
-             <td><button type="submit" class="btn btn-primary" formaction="/buy">BUY</button> </td>
-             <td><button type="submit" class="btn btn-primary" formaction="/sell-form">SELL</button> </td>
              <td><button type="submit" class="btn btn-primary" formaction="/withdraw-form">WITHDRAW</button> </td>
              <td><button type="submit" class="btn btn-primary" formaction="/exchange-form">EXCHANGE</button> </td>
              {%endif%}

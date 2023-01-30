@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block title %}CEX - Registration{% endblock %} {% block content %}
-Register page
+<h1> Registration Form </h1>
 <form method="POST">
     <table>
         <tr>
@@ -10,7 +10,7 @@ Register page
                   class="form-control"
                   id="name"
                   name="name"
-                  placeholder="Enter name"
+                  placeholder="Enter Name"
                   required
                   />     
             </td>
@@ -23,7 +23,7 @@ Register page
                   class="form-control"
                   id="surname"
                   name="surname"
-                  placeholder="Enter surname"
+                  placeholder="Enter Surname"
                   required
                   />     
             </td>
@@ -36,7 +36,7 @@ Register page
                   class="form-control"
                   id="adress"
                   name="adress"
-                  placeholder="Enter adress"
+                  placeholder="Enter Address"
                   required
                   />     
             </td>
@@ -49,7 +49,7 @@ Register page
                   class="form-control"
                   id="phoneNumber"
                   name="phoneNumber"
-                  placeholder="Enter phone number"
+                  placeholder="Enter Phone Number"
                   required
                   />     
             </td>
@@ -64,7 +64,7 @@ Register page
                       class="form-control"
                       id="email"
                       name="email"
-                      placeholder="Enter email"
+                      placeholder="Enter Email"
                       required
                       />
                       
@@ -79,15 +79,16 @@ Register page
                       class="form-control"
                       id="password"
                       name="password"
-                      placeholder="Enter password"
+                      placeholder="Enter Password"
                       required
                       />
                 </td>
           </tr>
-          <tr colspan=2>
-                
-          <button type="submit" class="btn btn-primary">Register</button>
-          </tr>
+        <tr>
+            <td colspan="2" align="right">
+                <button type="submit" class="btn btn-primary">Register</button>
+            </td>
+        </tr>
     </table>
 </form>
 {% endblock %}

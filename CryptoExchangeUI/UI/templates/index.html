@@ -5,10 +5,10 @@ CEX - Home Page
 {% block content %}
 
 <br>
-<table border="1" style="width: 25%" >
+<table border="0" style="width: 25%" >
     <tr>
-        <td>Currency</td>
-        <td>Value in $USD</td>
+        <th class="text-center">Currency</th>
+        <th class="text-center">Value in USD</td>
     </tr>
 {% for key,value in crypto.items() %}
 
@@ -37,10 +37,6 @@ CEX - Home Page
                   readonly
                   />
             </td>
-             {% if "user" in session%}
-             <td><button type="submit" class="btn btn-primary" formaction="/buy-form">BUY</button> </td>
-             <td><button type="submit" class="btn btn-primary" formaction="/sell-form">SELL</button> </td>
-             {%endif%}
          </tr>
 </form>
 {% endfor %}
